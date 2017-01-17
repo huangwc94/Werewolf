@@ -17,38 +17,50 @@
 <script src='https://code.responsivevoice.org/responsivevoice.js'></script>
 <style type="text/css">
     #message {
-        height: 500px;
+        margin-top:100px;
+        height: 200px;
         overflow: auto;
         overflow-scrolling: auto;
+        color: aliceblue;
     }
-
+    body{
+        background-color: #000;
+    }
     #log {
-        width: 500px;
-        margin: 0 auto;
+        text-align: center;
     }
 
     #reply {
         text-align: center;
     }
+    .light{
+        font-size: 40px;
+        text-align: center;
+    }
+    #backlog{
+        margin-top:100px;
+        float: left;
+        width: 20%;
+        height: 600px;
+        overflow: auto;
+        position: absolute;
+        top:0px;
+        left: 0px;
+    }
 </style>
 
 <body>
-<div id="log">
 
-    <div id="message">
-
-    </div>
-    <button id="clear" class="btn btn-warning">Clear</button>
+<h1 style="text-align: center;color:#fff;background-color: burlywood">Werewolf Web client</h1>
+<h3 style="width: 20%;background-color: burlywood">Log</h3>
+<div id="backlog">
 </div>
-
-<div id="player">
+<div id="player" class="container">
     <div class="row">
         <div class="client col-md-2" data="1">
             <div class="light">
-                <span class="green label label-success"><span class="glyphicon glyphicon-asterisk"
-                                                              aria-hidden="true"></span></span>
-                <span class="red label label-danger"><span class="glyphicon glyphicon-asterisk"
-                                                           aria-hidden="true"></span></span>
+                <span class="green label label-success">   </span>
+                <span class="red label label-danger">   </span>
             </div>
             <div class="btn-group" role="group">
                 <button class="btn btn-info pbtn" data="1"><span class="glyphicon glyphicon-menu-left"
@@ -63,10 +75,8 @@
         </div>
         <div class="client col-md-2" data="2">
             <div class="light">
-                <span class="green label label-success"><span class="glyphicon glyphicon-asterisk"
-                                                              aria-hidden="true"></span></span>
-                <span class="red label label-danger"><span class="glyphicon glyphicon-asterisk"
-                                                           aria-hidden="true"></span></span>
+                <span class="green label label-success">   </span>
+                <span class="red label label-danger">   </span>
             </div>
             <div class="btn-group" role="group">
                 <button class="btn btn-info pbtn" data="1"><span class="glyphicon glyphicon-menu-left"
@@ -81,10 +91,8 @@
         </div>
         <div class="client col-md-2" data="3">
             <div class="light">
-                <span class="green label label-success"><span class="glyphicon glyphicon-asterisk"
-                                                              aria-hidden="true"></span></span>
-                <span class="red label label-danger"><span class="glyphicon glyphicon-asterisk"
-                                                           aria-hidden="true"></span></span>
+                <span class="green label label-success">   </span>
+                <span class="red label label-danger">   </span>
             </div>
             <div class="btn-group" role="group">
                 <button class="btn btn-info pbtn" data="1"><span class="glyphicon glyphicon-menu-left"
@@ -99,10 +107,8 @@
         </div>
         <div class="client col-md-2" data="4">
             <div class="light">
-                <span class="green label label-success"><span class="glyphicon glyphicon-asterisk"
-                                                              aria-hidden="true"></span></span>
-                <span class="red label label-danger"><span class="glyphicon glyphicon-asterisk"
-                                                           aria-hidden="true"></span></span>
+                <span class="green label label-success">   </span>
+                <span class="red label label-danger">   </span>
             </div>
             <div class="btn-group" role="group">
                 <button class="btn btn-info pbtn" data="1"><span class="glyphicon glyphicon-menu-left"
@@ -117,10 +123,8 @@
         </div>
         <div class="client col-md-2" data="5">
             <div class="light">
-                <span class="green label label-success"><span class="glyphicon glyphicon-asterisk"
-                                                              aria-hidden="true"></span></span>
-                <span class="red label label-danger"><span class="glyphicon glyphicon-asterisk"
-                                                           aria-hidden="true"></span></span>
+                <span class="green label label-success">   </span>
+                <span class="red label label-danger">   </span>
             </div>
             <div class="btn-group" role="group">
                 <button class="btn btn-info pbtn" data="1"><span class="glyphicon glyphicon-menu-left"
@@ -135,10 +139,8 @@
         </div>
         <div class="client col-md-2" data="6">
             <div class="light">
-                <span class="green label label-success"><span class="glyphicon glyphicon-asterisk"
-                                                              aria-hidden="true"></span></span>
-                <span class="red label label-danger"><span class="glyphicon glyphicon-asterisk"
-                                                           aria-hidden="true"></span></span>
+                <span class="green label label-success">   </span>
+                <span class="red label label-danger">   </span>
             </div>
             <div class="btn-group" role="group">
                 <button class="btn btn-info pbtn" data="1"><span class="glyphicon glyphicon-menu-left"
@@ -151,12 +153,15 @@
                                                                  aria-hidden="true"></span></button>
             </div>
         </div>
+        <div id="log" class="col-md-12">
+            <div id="message">
+
+            </div>
+        </div>
         <div class="client col-md-2" data="7">
             <div class="light">
-                <span class="green label label-success"><span class="glyphicon glyphicon-asterisk"
-                                                              aria-hidden="true"></span></span>
-                <span class="red label label-danger"><span class="glyphicon glyphicon-asterisk"
-                                                           aria-hidden="true"></span></span>
+                <span class="green label label-success">   </span>
+                <span class="red label label-danger">   </span>
             </div>
             <div class="btn-group" role="group">
                 <button class="btn btn-info pbtn" data="1"><span class="glyphicon glyphicon-menu-left"
@@ -171,10 +176,8 @@
         </div>
         <div class="client col-md-2" data="8">
             <div class="light">
-                <span class="green label label-success"><span class="glyphicon glyphicon-asterisk"
-                                                              aria-hidden="true"></span></span>
-                <span class="red label label-danger"><span class="glyphicon glyphicon-asterisk"
-                                                           aria-hidden="true"></span></span>
+                <span class="green label label-success">   </span>
+                <span class="red label label-danger">   </span>
             </div>
             <div class="btn-group" role="group">
                 <button class="btn btn-info pbtn" data="1"><span class="glyphicon glyphicon-menu-left"
@@ -189,10 +192,8 @@
         </div>
         <div class="client col-md-2" data="9">
             <div class="light">
-                <span class="green label label-success"><span class="glyphicon glyphicon-asterisk"
-                                                              aria-hidden="true"></span></span>
-                <span class="red label label-danger"><span class="glyphicon glyphicon-asterisk"
-                                                           aria-hidden="true"></span></span>
+                <span class="green label label-success">   </span>
+                <span class="red label label-danger">   </span>
             </div>
             <div class="btn-group" role="group">
                 <button class="btn btn-info pbtn" data="1"><span class="glyphicon glyphicon-menu-left"
@@ -207,10 +208,8 @@
         </div>
         <div class="client col-md-2" data="10">
             <div class="light">
-                <span class="green label label-success"><span class="glyphicon glyphicon-asterisk"
-                                                              aria-hidden="true"></span></span>
-                <span class="red label label-danger"><span class="glyphicon glyphicon-asterisk"
-                                                           aria-hidden="true"></span></span>
+                <span class="green label label-success">   </span>
+                <span class="red label label-danger">   </span>
             </div>
             <div class="btn-group" role="group">
                 <button class="btn btn-info pbtn" data="1"><span class="glyphicon glyphicon-menu-left"
@@ -225,10 +224,8 @@
         </div>
         <div class="client col-md-2" data="11">
             <div class="light">
-                <span class="green label label-success"><span class="glyphicon glyphicon-asterisk"
-                                                              aria-hidden="true"></span></span>
-                <span class="red label label-danger"><span class="glyphicon glyphicon-asterisk"
-                                                           aria-hidden="true"></span></span>
+                <span class="green label label-success">   </span>
+                <span class="red label label-danger">   </span>
             </div>
             <div class="btn-group" role="group">
                 <button class="btn btn-info pbtn" data="1"><span class="glyphicon glyphicon-menu-left"
@@ -243,10 +240,8 @@
         </div>
         <div class="client col-md-2" data="12">
             <div class="light">
-                <span class="green label label-success"><span class="glyphicon glyphicon-asterisk"
-                                                              aria-hidden="true"></span></span>
-                <span class="red label label-danger"><span class="glyphicon glyphicon-asterisk"
-                                                           aria-hidden="true"></span></span>
+                <span class="green label label-success">   </span>
+                <span class="red label label-danger">   </span>
             </div>
             <div class="btn-group" role="group">
                 <button class="btn btn-info pbtn" data="1"><span class="glyphicon glyphicon-menu-left"
@@ -279,7 +274,8 @@
         } else if (e.startsWith("RLIGHT")) {
             update_lights("red", e.toString().split(":")[1]);
         } else {
-            $("#message").append("<p>" + e + "</p>");
+            $("#message").html("<h1>" + e + "</h1>");
+            $("#backlog").append("<h3>" + e +"</h3>")
             responsiveVoice.speak(e, "US English Female");
         }
 
@@ -297,9 +293,7 @@
         }
     }
     $(function () {
-        $("#clear").click(function () {
-            $("#message").empty();
-        });
+
         $("#send").click(function () {
             socket.emit("reply", $("#mas").val());
             $("#mas").val("");

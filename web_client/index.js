@@ -2,6 +2,8 @@
  * Created by Weicheng Huang on 2017/1/16.
  */
 
+var port = "COM6";
+
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
@@ -24,7 +26,7 @@ io.on('connection', function (socket) {
         serialport = null;
     }
 
-    serialport = new SerialPort("COM6", {"baudRate": 115200, parser: SerialPort.parsers.readline("\n")});
+    serialport = new SerialPort(port, {"baudRate": 115200, parser: SerialPort.parsers.readline("\n")});
     serialport.on('open', function () {
         console.log('Serial Port Opend');
         serialport.on('data', function (data) {
@@ -43,7 +45,7 @@ io.on('connection', function (socket) {
 });
 
 http.listen(3000, function () {
-    console.log('listening on *:3000');
+    console.log('Serial server start at:http://127.0.0.1:3000');
 });
 
 
