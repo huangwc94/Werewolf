@@ -2,9 +2,10 @@
  * Created by Weicheng Huang on 2017/1/16.
  */
 
-var port = "/dev/cu.usbmodem1421";
-
-var app = require('express')();
+//var port = "/dev/cu.usbmodem1421";
+var port = "COM4";
+var express = require('express');
+var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var SerialPort = require("serialport");
@@ -14,6 +15,8 @@ var charList = ['a','b','c','d','e','f','g','h','i','j','k','l'];
 app.get('/', function (req, res) {
     res.sendfile('index.html');
 });
+app.use('/res',express.static(__dirname + "/res"));
+
 var closed = true;
 io.on('connection', function (socket) {
     console.log('a user connected');
@@ -28,7 +31,7 @@ io.on('connection', function (socket) {
 
     serialport = new SerialPort(port, {"baudRate": 115200, parser: SerialPort.parsers.readline("\n")});
     serialport.on('open', function () {
-        console.log('Serial Port Opend');
+        console.log('Serial Port Opened');
         serialport.on('data', function (data) {
             if(data !=""){
                 console.log("Serial Receive:" + data);
