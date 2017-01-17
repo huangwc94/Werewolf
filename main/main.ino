@@ -99,7 +99,7 @@ uint8_t previousAlivePlayer(uint8_t select){
         select = PLAYER_NUMBER;  
       }
     }
-    Serial.println(String("Selecting:") + select);
+   
    return select;
 }
 uint8_t nextAlivePlayer(uint8_t select){
