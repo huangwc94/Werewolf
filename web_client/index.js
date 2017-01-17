@@ -2,7 +2,7 @@
  * Created by Weicheng Huang on 2017/1/16.
  */
 
-var port = "COM6";
+var port = "/dev/cu.usbmodem1421";
 
 var app = require('express')();
 var http = require('http').Server(app);
