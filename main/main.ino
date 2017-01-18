@@ -86,7 +86,7 @@ void checkResult(){
   	showIdentity();
   	while(1);
   }
-  Serial.println(String("Game is not over! ") + werewolfRemain + " werewolves remain. " + citizenRemain + " citizens remain. " + godRemain + " god remain.");
+  //Serial.println(String("Game is not over! ") + werewolfRemain + " werewolves remain. " + citizenRemain + " citizens remain. " + godRemain + " god remain.");
   delay(5000);
 }
 
@@ -367,19 +367,19 @@ void gameLoop(){
 	/**
 	* Lycan turn
 	*/
-	Serial.println("Werewolf show up");
+	Serial.println("Werewolf open eyes");
 	delay(3000);
 	if(g_isFirstLoop){
 		Serial.println("Werewolf confirm identity");
 		uint8_t confirmCount = 0;
-
+		clearInput();
 		while(confirmCount < LYCAN_NUMBER){
 			if( getInput(&id,&btn) && (g_playerRole[id - 1] != R_LYCAN)){
 				confirmCount ++;
 				g_playerRole[id - 1] = R_LYCAN;
 				g_playerRedLight += clientIdToBinary(id);
 				renderLight();
-				Serial.println(String("Werewolf confirmed:") + id);
+				//Serial.println(String("Werewolf confirmed:") + id);
 			}
 		}
 	}
@@ -387,7 +387,7 @@ void gameLoop(){
 	powerOffAllLight();
 	Serial.println("Werewolf pick someone to kill");
 	lycan_kill_id = selectOne(30000,R_LYCAN);
-	Serial.println(String("Werewolf select to kill:") + lycan_kill_id);
+	//Serial.println(String("Werewolf select to kill:") + lycan_kill_id);
 	delay(3000);
 	Serial.println("Werewolf close eyes");
 	powerOffAllLight();
@@ -400,11 +400,12 @@ void gameLoop(){
 	if(g_isFirstLoop){
 		Serial.println("Witch confirm identity...");
 		delay(2000);
+		clearInput();
 		while(1){
 			if(getInput(&id,&btn) && (g_playerRole[id - 1] == R_CITIZEN)){
 				g_playerRole[id - 1] = R_WITCH;
 				g_witchId = id;
-				Serial.println("Witch confirmed:" + id);
+				//Serial.println("Witch confirmed:" + id);
 				g_playerGreenLight = clientIdToBinary(id);
 				renderLight();
 				delay(2000);
@@ -415,21 +416,21 @@ void gameLoop(){
 	powerOffAllLight();
 
 	bool witchDie = (g_playerAlive & clientIdToBinary(g_witchId)) == 0;
-	Serial.println(String("Tonight's vicitm is:")+ lycan_kill_id);
+	Serial.println(String("Tonight's victim is:"));
 	delay(2000);
 	if(witchDie){
 		Serial.println("Do you want to save this guy?");
-		delay(5000);
+		delay(9000);
 		Serial.println("Do you want to posion someone?");
-		delay(5000);
+		delay(10000);
 	}else{
   
 		g_playerGreenLight = 0;
 		g_playerRedLight = g_witchCureUsed ? 0 : clientIdToBinary(lycan_kill_id);
 		renderLight();
-		delay(1000);
+		delay(3000);
 		Serial.println("Do you want to save this guy?");
-		// Save vicitm
+		// Save victim
 		bool saveSuccess = false;
 		if(!g_witchCureUsed){
 			if(lycan_kill_id == g_witchId){
@@ -437,7 +438,8 @@ void gameLoop(){
 					g_playerGreenLight = clientIdToBinary(lycan_kill_id);
 					g_playerRedLight = clientIdToBinary(lycan_kill_id);
 					renderLight();
-					if(confirm(0,R_WITCH)){
+					clearInput();
+					if(confirm(30000,R_WITCH)){
 						g_witchCureUsed = true;
 						lycan_kill_id = 0;
 						g_playerRedLight = 0;
@@ -454,7 +456,8 @@ void gameLoop(){
 				g_playerGreenLight = clientIdToBinary(lycan_kill_id);
 				g_playerRedLight = clientIdToBinary(lycan_kill_id);
 				renderLight();
-				if(confirm(0,R_WITCH)){
+				clearInput();
+				if(confirm(30000,R_WITCH)){
 					g_witchCureUsed = true;
 					lycan_kill_id = 0;
 					g_playerRedLight = 0;
@@ -474,8 +477,9 @@ void gameLoop(){
 		delay(1000);
 		Serial.println("Do you want to posion someone?");
 		if(g_witchPosionUsed || saveSuccess){
-			delay(5000);
+			delay(10000);
 		}else{
+			clearInput();
 			witch_kill_id = selectOne(30000,R_WITCH);
 			g_witchPosionUsed = true;
 		}
@@ -492,11 +496,12 @@ void gameLoop(){
 	if(g_isFirstLoop){
 		Serial.println("Seer confirm identity...");
 		delay(2000);
+		clearInput();
 		while(1){
 			if(getInput(&id,&btn) && (g_playerRole[id - 1] == R_CITIZEN)){
 				g_playerRole[id - 1] = R_SEER;
 				g_seerId = id;
-				Serial.println("Seer confirmed:" + id);
+				//Serial.println("Seer confirmed:" + id);
 				g_playerGreenLight = clientIdToBinary(id);
 				renderLight();
 				delay(2000);
@@ -507,11 +512,12 @@ void gameLoop(){
  	bool seerDie = (g_playerAlive & clientIdToBinary(g_seerId)) == 0;
 	if(seerDie){
 		Serial.println("Seer pick someone to testify");
-		delay(3000);
+		delay(5000);
 		Serial.println("The result of this guys is");
 		delay(3000);
 	}else{
 		Serial.println("Seer pick someone to testify");
+		clearInput();
 		uint8_t select = selectOne(30000,R_SEER);
 		bool isBadGuy = g_playerRole[select - 1] == R_LYCAN;
 		Serial.println("The result of this guys is");
@@ -536,11 +542,12 @@ void gameLoop(){
 	if(g_isFirstLoop){
 		Serial.println("Hunter confirm identity");
 		delay(2000);
+		clearInput();
 		while(1){
 			if(getInput(&id,&btn) && (g_playerRole[id - 1] == R_CITIZEN)){
 				g_playerRole[id - 1] = R_HUNTER;
 				g_hunterId = id;
-				Serial.println("Hunter confirmed:" + id);
+				//Serial.println("Hunter confirmed:" + id);
 				g_playerGreenLight = clientIdToBinary(id);
 				renderLight();
 				delay(2000);
@@ -556,7 +563,7 @@ void gameLoop(){
 		Serial.println("to shot someone");
 		delay(3000);
 		Serial.println("Do you want to use your ability?");
-		delay(5000);
+		delay(10000);
 	}else{
 		if(lycan_kill_id == g_hunterId && witch_kill_id != g_hunterId){
 			Serial.println("Tonight you are");
@@ -571,6 +578,7 @@ void gameLoop(){
 			g_playerGreenLight = clientIdToBinary(g_hunterId);
 			g_playerRedLight = clientIdToBinary(g_hunterId);
 			renderLight();
+			clearInput();
 			hunter_enable_skill = confirm(30000,R_HUNTER);
 			if(hunter_enable_skill){
 				g_playerRedLight = 0;
@@ -588,7 +596,7 @@ void gameLoop(){
 			delay(3000);
 			Serial.println("Do you want to use your ability?");
 			powerOffAllLight();
-			delay(5000);
+			delay(10000);
 		}
 	}
 	powerOffAllLight();
@@ -602,11 +610,12 @@ void gameLoop(){
 	if(g_isFirstLoop){
 		Serial.println("Moron open eyes and confirm identity");
 		delay(2000);
+		clearInput();
 		while(1){
 			if(getInput(&id,&btn) && (g_playerRole[id - 1] == R_CITIZEN)){
 				g_playerRole[id - 1] = R_MORON;
 				g_moronId = id;
-				Serial.println("Moron confirmed:" + id);
+				//Serial.println("Moron confirmed:" + id);
 				g_playerGreenLight = clientIdToBinary(id);
 				renderLight();
 				delay(2000);
@@ -625,23 +634,26 @@ void gameLoop(){
 	*
 	*
 	*/
+	if(g_isFirstLoop){
+		Serial.println("Now we start the sheriff campaign");
+		delay(3000);
+		Serial.println("After complete, sheriff please click confirm key...");
+		delay(4000);
+		clearInput();
+		while(1){
+			if(getInput(&id,&btn) &&  (g_playerAlive & clientIdToBinary(id)) != 0){
+				g_sheriffId = id;
+				g_playerGreenLight = clientIdToBinary(g_sheriffId);
+				renderLight();
+				break;
+			}
 
-	Serial.println("Now we start the sheriff campaign");
-	delay(3000);
-	Serial.println("After complete, sheriff please click confirm key...");
-	delay(4000);
-	while(1){
-		if(getInput(&id,&btn) &&  (g_playerAlive & clientIdToBinary(id)) != 0){
-			g_sheriffId = id;
-			g_playerGreenLight = clientIdToBinary(g_sheriffId);
-			renderLight();
-			break;
 		}
-
+		Serial.println(String("Today's sheriff is:")+g_sheriffId);
+		delay(3000);
+		powerOffAllLight();
 	}
-	Serial.println(String("Today's sheriff is:")+g_sheriffId);
-	delay(3000);
-	powerOffAllLight();
+
 
 	g_playerRedLight = clientIdToBinary(lycan_kill_id) | clientIdToBinary(witch_kill_id);
 	g_playerGreenLight = 0;
@@ -661,7 +673,7 @@ void gameLoop(){
 		Serial.println("Hunter please pick one to kill");
 		g_playerAlive = g_playerAlive | clientIdToBinary(g_hunterId);
 		delay(2000);
-
+		clearInput();
 		uint8_t hunter_kill_id = selectOne(30000,R_HUNTER);
 
 		g_playerAlive = g_playerAlive & ~clientIdToBinary(hunter_kill_id);
@@ -679,6 +691,7 @@ void gameLoop(){
 
 	bool sheriffDie = (g_playerAlive & clientIdToBinary(g_sheriffId)) == 0;
 	if(sheriffDie){
+		clearInput();
 		sheriffSelectNew();
 	}
 	powerOffAllLight();
@@ -688,7 +701,7 @@ void gameLoop(){
 	g_playerGreenLight = g_playerAlive;
 	renderLight();
 	delay(4000);
-
+	clearInput();
 	while(1){
 		if(getInput(&id,&btn) &&  (g_playerAlive & clientIdToBinary(id)) != 0){
 			suspectId = id;
@@ -708,16 +721,15 @@ void gameLoop(){
 		g_playerGreenLight = clientIdToBinary(suspectId);
 		renderLight();
 		delay(3000);
+		clearInput();
 		if(confirm(30000,R_HUNTER)){
 			g_playerRedLight = 0;
 			renderLight();
 			Serial.println("Hunter please pick one to kill");
 
 			delay(2000);
+			clearInput();
 			uint8_t hunter_kill_id = selectOne(30000,R_HUNTER);
-			if(g_sheriffId == hunter_kill_id){
-				sheriffSelectNew();
-			}
 			g_playerAlive = g_playerAlive & ~clientIdToBinary(hunter_kill_id);
 		}else{
 			g_playerGreenLight = 0;
@@ -731,6 +743,7 @@ void gameLoop(){
 		g_playerGreenLight = clientIdToBinary(suspectId);
 		renderLight();
 		delay(3000);
+		clearInput();
 		if(confirm(30000,R_MORON)){
 			g_playerRedLight = 0;
 			suspectId = 0;
@@ -741,18 +754,24 @@ void gameLoop(){
 			
 		}
 		delay(3000);
-	}else if(suspectId == g_sheriffId){
+	}
+	g_playerAlive = g_playerAlive & ~clientIdToBinary(suspectId);
+
+	if(g_sheriffId!=0 && (g_playerAlive & clientIdToBinary(g_sheriffId)) == 0){
+		clearInput();
 		sheriffSelectNew();
 	}
+
 	powerOffAllLight();
-	g_playerAlive = g_playerAlive & ~clientIdToBinary(suspectId);
 	g_playerGreenLight = g_playerAlive;
-	renderLight();
 	Serial.println("Today's survivors are");
+	delay(1000);
+	renderLight();
 	delay(5000);
 	checkResult();
 	g_isFirstLoop = false;
 	powerOffAllLight();
+
 }
 void test(){
 	
