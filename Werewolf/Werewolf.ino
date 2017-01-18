@@ -10,13 +10,10 @@ of c syntex, should be much more clear and easy to read
 #define __VERSION String("V0.2")
 
 GameLogic game;
-
 void setup() {
-	Serial.begin(115200);
 	game.init();
-	game.start();
 }
 
 void loop() {
-	
+	game.loop();	
 }
