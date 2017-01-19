@@ -33,10 +33,11 @@ void GameLogic::init(){
 	this->status->playerAlive = ~0;
 	this->status->usedPosion = false;
 	this->status->usedCure = false;
+	this->tstatus = malloc(sizeof(TurnStatus));
 
 	say("Game Started");
 
-	this->tstatus = malloc(sizeof(TurnStatus));
+
 }
 void GameLogic::loop(){
 	// init turn status
@@ -178,26 +179,157 @@ void GameLogic::lycanTurn(){
 
 void GameLogic::witchTurn(){
 	say("Witch open eyes");
-	
+	if(this->status->isFirstLoop){
+		say("Witch confirm identity");
+		this->status->witchId = this->roleChangeOnce(R_CITIZEN,R_WITCH);
+	}
+	delay(S_TIME);
+
+	if(this->isPlayerAlive(this->status->witchId)){
+
+		// use cure
+		say("Tonight's victim is");
+		uint16_t g = 0;
+		uint16_t r = this->status->usedCure ? 0 : this->clientIdToBinary(this->tstatus->lycanKillId);
+		this->conn->outputLight(g,r);
+		delay(M_TIME);
+		say("Do you want to save this guy?");
+
+		bool ableToUseCure = (!this->status->usedCure) && this->tstatus->lycanKillId == this->status->witchId && this->status->isFirstLoop;
+
+		ableToUseCure = ableToUseCure || (!this->status->usedCure && this->tstatus->lycanKillId > 0);
+		
+		if(ableToUseCure){
+			bool result = this->confirmWithRole(R_WITCH,30000,this->tstatus->lycanKillId);
+			if(result){
+				this->status->usedCure = true;
+				this->tstatus->lycanKillId = 0;
+				this->tstatus->witchSaved = true;
+			}
+		}else{
+			delay(L_TIME);
+		}
+
+		// use posion
+		say("Do you want to posion someone?");
+		
+		if((!this->status->usedPosion) && (!this->tstatus->witchSaved)){
+			this->tstatus->witchPosionId = this->selectOneWithAllowRole(R_WITCH,30000,false);
+			this->status->usedPosion = this->tstatus->witchPosionId != 0;
+		}else{
+			delay(L_TIME);
+		}
+		say(String(this->tstatus->witchPosionId));
+		say(String(this->status->usedPosion));
+	}else{
+		say("Tonight's victim is");
+		delay(M_TIME);
+		say("Do you want to save this guy?");
+		delay(L_TIME);
+		say("Do you want to posion someone?");
+		delay(L_TIME);
+	}
+
+
 	say("Witch close eyes");
 }
 
 void GameLogic::seerTurn(){
 	say("Seer open eyes");
+	if(this->status->isFirstLoop){
+		say("Seer confirm identity");
+		this->status->seerId = this->roleChangeOnce(R_CITIZEN,R_SEER);
+	}
+	delay(S_TIME);
+	if(this->isPlayerAlive(this->status->seerId)){
+		say("Seer pick someone to testify");
+		Pid id = this->selectOneWithAllowRole(R_SEER,30000,true);
+		uint16_t l = this->clientIdToBinary(id);
 
+		say("The result of this guy is");
+		if(this->status->playerRole[id-1] == R_LYCAN)
+			this->conn->outputLight(0,l);
+		else
+			this->conn->outputLight(l,0);
+		delay(S_TIME);
+		this->powerOffAllLight();
+
+	}else{
+		say("Seer pick someone to testify");
+		delay(L_TIME);
+		say("The result of this guy is");
+		delay(S_TIME);
+	}
 	say("Seer close eyes");
 }
 
 void GameLogic::hunterTurn(){
 	say("Hunter open eyes");
+	if(this->status->isFirstLoop){
+		say("Hunter confirm identity");
+		this->status->hunterId = this->roleChangeOnce(R_CITIZEN,R_HUNTER);
+	}
+	delay(S_TIME);
 
+	if(this->isPlayerAlive(this->status->hunterId)){
+		say("Tonight your ability status is");
+		uint16_t l = this->clientIdToBinary(this->status->hunterId);
+		bool ableToUseAbility = this->status->hunterId == this->tstatus->lycanKillId;
+
+		if(ableToUseAbility)
+			this->conn->outputLight(l,0);
+		else
+			this->conn->outputLight(0,l);
+		delay(S_TIME);
+		this->powerOffAllLight();
+		say("Do you want to use your ability?");
+		if(ableToUseAbility)
+			this->tstatus->hunterEnableSkill = this->confirmWithRole(R_HUNTER,30000,this->status->hunterId);
+		else
+			delay(M_TIME);
+	}else{
+		say("Tonight your ability status is");
+		delay(S_TIME);
+		say("Do you want to use your ability?");
+		delay(L_TIME);
+	}
+
+	delay(S_TIME);
 	say("Hunter close eyes");
 }
 
 void GameLogic::moronTurn(){
 	say("Moron open eyes");
-
+	if(this->status->isFirstLoop){
+		say("Hunter confirm identity");
+		this->status->moronId = this->roleChangeOnce(R_CITIZEN,R_MORON);
+	}
+	delay(S_TIME);
 	say("moron close eyes");
+}
+
+void sheirffCampagin(){
+
+}
+
+void changeSheirff(){
+
+}
+
+void hunterSkill(){
+
+}
+
+void moronSkill(){
+
+}
+
+void reportSuvivor(){
+
+}
+
+void reportVictim(uint16_t deadList){
+
 }
 
 void GameLogic::onNight(){
@@ -221,6 +353,7 @@ void GameLogic::onDay(){
 Pid GameLogic::roleChangeOnce(role_t from,role_t to){
 	uint8_t id,btn;
 	this->powerOffAllLight();
+	this->conn->clearBuffer();
 	while(1){
 		if(this->conn->input(id,btn) && this->isPlayerAlive(id) && this->status->playerRole[id-1] == from){
 			this->status->playerRole[id-1] = to;
@@ -229,15 +362,15 @@ Pid GameLogic::roleChangeOnce(role_t from,role_t to){
 			break;
 		}
 	}
-
 	delay(S_TIME);
 	this->powerOffAllLight();
 	return id;
 }
-Pid GameLogic::roleChangeMore(role_t from,role_t to,uint8_t count){
+void GameLogic::roleChangeMore(role_t from,role_t to,uint8_t count){
 	uint8_t id,btn;
 	this->powerOffAllLight();
 	uint16_t r = 0;
+	this->conn->clearBuffer();
 	while(count > 0){
 		if(this->conn->input(id,btn) && this->isPlayerAlive(id) && this->status->playerRole[id-1] == from){
 			this->status->playerRole[id-1] = to;
@@ -248,7 +381,6 @@ Pid GameLogic::roleChangeMore(role_t from,role_t to,uint8_t count){
 	}
 	delay(S_TIME);
 	this->powerOffAllLight();
-	return id;
 }
 
 bool GameLogic::confirmWithId(Pid allow, unsigned long timeout,Pid lightsOn){
@@ -259,6 +391,7 @@ bool GameLogic::confirmWithId(Pid allow, unsigned long timeout,Pid lightsOn){
 
 	uint16_t l = this->clientIdToBinary(lightsOn);
 	this->conn->outputLight(l,l);
+	this->conn->clearBuffer();
 	while(timeout==0 || (current - start) <= timeout){
 		current = millis();
 		if(this->conn->input(id,btn) && this->isPlayerAlive(id) && id == allow){
@@ -282,7 +415,7 @@ bool GameLogic::confirmWithRole(role_t allow, unsigned long timeout,Pid lightsOn
 	unsigned long start = millis();
 	unsigned long current = millis();
 	this->powerOffAllLight();
-	
+	this->conn->clearBuffer();
 	uint16_t l = this->clientIdToBinary(lightsOn);
 	this->conn->outputLight(l,l);
 	while(timeout==0 || (current - start) <= timeout){
@@ -291,10 +424,12 @@ bool GameLogic::confirmWithRole(role_t allow, unsigned long timeout,Pid lightsOn
 			if(btn == 3){
 				this->conn->outputLight(l,0);
 				delay(S_TIME);
+				this->powerOffAllLight();
 				return true;
 			}else if(btn == 4){
 				this->conn->outputLight(0,l);
 				delay(S_TIME);
+				this->powerOffAllLight();
 				return false;
 			}
 		}
@@ -304,7 +439,7 @@ bool GameLogic::confirmWithRole(role_t allow, unsigned long timeout,Pid lightsOn
 }
 
 Pid GameLogic::selectOneWithAllowRole(unsigned long timeout,role_t allow,bool usingGreenLight = false){
-	Pid select = this->nextAlivePlayer(1);
+	Pid select = this->nextAlivePlayer(0);
 	this->powerOffAllLight();
 	unsigned long startTime = millis();
 	unsigned long current = millis();
@@ -314,7 +449,7 @@ Pid GameLogic::selectOneWithAllowRole(unsigned long timeout,role_t allow,bool us
 		this->conn->outputLight(l,0);
 	else
 		this->conn->outputLight(0,l);
-
+	this->conn->clearBuffer();
 	while(timeout == 0 || (current - startTime) < timeout){
 		current = millis();
 		if(this->conn->input(id,btn)){
@@ -350,11 +485,12 @@ Pid GameLogic::selectOneWithAllowRole(unsigned long timeout,role_t allow,bool us
 }
 
 Pid GameLogic::selectOneWithAllowId(unsigned long timeout,Pid allow,bool usingGreenLight = false){
-	Pid select = this->nextAlivePlayer(1);
+	Pid select = this->nextAlivePlayer(0);
 	this->powerOffAllLight();
 	unsigned long startTime = millis();
 	unsigned long current = millis();
 	uint8_t id,btn;
+	this->conn->clearBuffer();
 	uint16_t l = this->clientIdToBinary(select);
 	if(usingGreenLight)
 		this->conn->outputLight(l,0);

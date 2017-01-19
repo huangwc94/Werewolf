@@ -3,7 +3,7 @@
 	#include <Wire.h>
 	#include <Arduino.h>
 
-	#define STOP_CHAR "$"
+	#define STOP_CHAR '$'
 
 
 	class Driver{

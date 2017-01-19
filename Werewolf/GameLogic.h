@@ -82,7 +82,6 @@ class GameLogic
 
 		void say(String);
 	private:
-		role_t playerRole[PLAYER_NUMBER];
 		Driver *conn;
 		GameStatus *status;
 		TurnStatus *tstatus;
@@ -103,13 +102,21 @@ class GameLogic
 		void seerTurn();
 		void hunterTurn();
 		void moronTurn();
+		void sheirffCampagin();
+		void changeSheirff();
+		void hunterSkill();
+		void moronSkill();
 
+		void reportSuvivor();
+		void reportVictim(uint16_t deadList);
+
+		// main loop
 		void onNight();
 		void onDay();
 
 		// input/output
 		Pid roleChangeOnce(role_t from,role_t to);
-		Pid roleChangeMore(role_t from,role_t to,uint8_t count);
+		void roleChangeMore(role_t from,role_t to,uint8_t count);
 		bool confirmWithId(Pid allow, unsigned long timeout,Pid lightsOn);
 		bool confirmWithRole(role_t allow, unsigned long timeout,Pid lightsOn);
 		Pid selectOneWithAllowRole(unsigned long timeout,role_t allow,bool usingGreenLight);

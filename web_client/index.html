@@ -280,9 +280,12 @@
         } else if (e.startsWith("RLIGHT")) {
             update_lights("red", e.toString().split(":")[1]);
         } else {
-            $("#message").html("<h1>" + e + "</h1>");
-            $("#backlog").append("<h3>" + e +"</h3>")
-            responsiveVoice.speak(e, "US English Female");
+            $("#backlog").append("<h3>" + e +"</h3>");
+            if(!e.startsWith("Debug:")){
+                $("#message").html("<h1>" + e + "</h1>");
+                responsiveVoice.speak(e, "US English Female");
+            }
+
         }
 
     });

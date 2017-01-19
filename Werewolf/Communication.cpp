@@ -2,6 +2,7 @@
 
 ComputerDriver::ComputerDriver(){
 	Serial.begin(115200);
+	buffer = String("");
 	delay(50);
 	
 }
@@ -15,9 +16,20 @@ void ComputerDriver::outputLight(const uint16_t g,const uint16_t r){
 	Serial.println(String("GLIGHT:")+g);
 }
 
-bool ComputerDriver::input(uint8_t &id, uint8_t & btn){
-	id = 1;
-	btn = 2;
+bool ComputerDriver::input(uint8_t &id, uint8_t &btn){
+	if(Serial.available()) {
+		char inChar = (char)Serial.read();
+		if (inChar == STOP_CHAR) {
+			id =       (uint8_t) this->buffer[0] - 'a' + 1;
+			btn =      (uint8_t) this->buffer[2] - 'a' + 1;
+			clearBuffer();
+			Serial.println(String("Debug:Getting input:") + id + " : " + btn);   
+			return true;
+		}else{
+			buffer += inChar;
+			return false;
+		}
+	}
 	return false;
 }
 
