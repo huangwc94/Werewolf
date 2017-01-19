@@ -291,7 +291,7 @@
                 responsiveVoice.speak(e, "Chinese Female");
             }
             if(e.startsWith("天黑请闭眼")){
-                playerMusic("");
+                //playerMusic("");
             }
 
 
@@ -301,7 +301,7 @@
 
     function playerMusic(name){
         console.log("play music!");
-        $('#music').prop("volume", 0.4);
+
         $("#music").get(0).play();
     }
 
