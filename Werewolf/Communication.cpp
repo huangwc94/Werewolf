@@ -23,7 +23,6 @@ bool ComputerDriver::input(uint8_t &id, uint8_t &btn){
 			id =       (uint8_t) this->buffer[0] - 'a' + 1;
 			btn =      (uint8_t) this->buffer[2] - 'a' + 1;
 			clearBuffer();
-			Serial.println(String("Debug:Getting input:") + id + " : " + btn);   
 			return true;
 		}else{
 			buffer += inChar;
@@ -34,6 +33,6 @@ bool ComputerDriver::input(uint8_t &id, uint8_t &btn){
 }
 
 void ComputerDriver::clearBuffer(){
-	Serial.flush();
+	while(Serial.available()) Serial.read();
 	this->buffer = String("");
 }

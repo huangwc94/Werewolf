@@ -36,7 +36,7 @@
 /**
 * Structure definition
 */
-typedef enum{R_CITIZEN,R_LYCAN,R_WITCH,R_HUNTER,R_SEER,R_MORON,R_GUARD} role_t;
+typedef enum{R_CITIZEN,R_LYCAN,R_WITCH,R_HUNTER,R_SEER,R_MORON,R_GUARD,R_ALL} role_t;
 
 typedef uint8_t Pid;
 
@@ -53,6 +53,7 @@ typedef struct{
 	bool isFirstLoop;
 	bool usedPosion;
 	bool usedCure;
+	bool badgeLost;
 } GameStatus;
 
 typedef struct 
@@ -109,12 +110,14 @@ class GameLogic
 
 		void reportSuvivor();
 		void reportVictim(uint16_t deadList);
-
+		void voteForSuspect();
+		void startSpeech(uint16_t speechList, Pid startId, unsigned long eachTimeout);
 		// main loop
 		void onNight();
 		void onDay();
 
 		// input/output
+		Pid confirmOneIdentity(bool usingGreenLight);
 		Pid roleChangeOnce(role_t from,role_t to);
 		void roleChangeMore(role_t from,role_t to,uint8_t count);
 		bool confirmWithId(Pid allow, unsigned long timeout,Pid lightsOn);
