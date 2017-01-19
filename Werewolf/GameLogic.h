@@ -15,7 +15,7 @@
 #define HAS_HUNTER true
 #define HAS_MORON true
 #define HAS_GUARD false
-
+#define __VERSION String("V0.2")
 // time definition
 #define XS_TIME 1000
 #define S_TIME 2000

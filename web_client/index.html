@@ -29,7 +29,9 @@
     #log {
         text-align: center;
     }
-
+    #music{
+        display:None;
+    }
     #reply {
         text-align: center;
     }
@@ -269,6 +271,9 @@
     </div>
 
 </div>
+
+<audio id="music" src="res/night.mp3" type="audio/mpeg"></audio>
+
 </body>
 <script>
     var socket = io();
@@ -283,12 +288,22 @@
             $("#backlog").append("<h3>" + e +"</h3>");
             if(!e.startsWith("Debug:")){
                 $("#message").html("<h1>" + e + "</h1>");
-                responsiveVoice.speak(e, "US English Female");
+                responsiveVoice.speak(e, "Chinese Female");
             }
+            if(e.startsWith("天黑请闭眼")){
+                playerMusic("");
+            }
+
 
         }
 
     });
+
+    function playerMusic(name){
+        console.log("play music!");
+        $('#music').prop("volume", 0.4);
+        $("#music").get(0).play();
+    }
 
     function update_lights(color, data) {
         var d = parseInt(data);

@@ -11,13 +11,16 @@ void GameLogic::init(){
 	#ifdef DRIVER_TYPE_COMPUTER
 	ComputerDriver *driver = new ComputerDriver();
 	conn = driver;
-	say("Using computer serial port!");
+	say("Debug:Using computer serial port!");
 	#endif
 
 	#ifdef DRIVER_TYPE_HARDWARE
 	// TO DO:
 	// 1. Add driver implementation
 	#endif
+
+	say("欢迎使用狼人杀电子法官，版本号："+__VERSION);
+	delay(M_TIME);
 	this->powerOnAllLight();
 
 	this->status = malloc(sizeof(GameStatus));
@@ -36,7 +39,7 @@ void GameLogic::init(){
 	this->status->badgeLost = false;
 	this->tstatus = malloc(sizeof(TurnStatus));
 
-	say("Game Started");
+	say("游戏开始");
 
 
 }
@@ -49,11 +52,11 @@ void GameLogic::loop(){
 	this->tstatus->hunterEnableSkill = false;
 
 	this->powerOffAllLight();
-	say("Night is coming, all close eyes");
+	say("天黑请闭眼");
 	this->onNight();
 	this->powerOffAllLight();
 	
-	say("The night is over, all open eyes");
+	say("天亮请睁眼");
 	this->onDay();
 
 	this->status->isFirstLoop = false;
@@ -61,7 +64,7 @@ void GameLogic::loop(){
 
 void GameLogic::say(String data){
 	this->conn->outputString(data);
-	unsigned long time = data.length() * SPEECH_SPEED * 0.6f + 800;
+	unsigned long time = data.length() * SPEECH_SPEED * 0.8f + 800;
 	delay(time);
 }
 
@@ -84,25 +87,25 @@ void GameLogic::checkResult(){
   }
 
   if(werewolfRemain==0 && (citizenRemain==0 || godRemain==0)){
-  	this->say("Game Over, the result is");
+  	this->say("游戏结束，获胜的一方是");
   	delay(L_TIME);
-  	this->say("Draw, everyone win");
+  	this->say("平局，所有玩家获胜！");
   	this->showIdentity();
   	while(1);
   }
 
   if(werewolfRemain==0){
-  	this->say("Game Over, the result is");
+  	this->say("游戏结束，获胜的一方是");
   	delay(L_TIME);
-  	this->say("Good Man team win!");
+  	this->say("好人阵营获胜！");
   	this->showIdentity();
   	while(1);
   }
 
   if(citizenRemain==0 || godRemain==0){
-  	this->say("Game Over, the result is");
+  	this->say("游戏结束，获胜的一方是");
   	delay(L_TIME);
-  	this->say("Werewolf team win!");
+  	this->say("狼人阵营获胜！");
   	this->showIdentity();
   	while(1);
   }
@@ -166,21 +169,21 @@ void GameLogic::markPlayerAlive(Pid id){
 
 // logic proc
 void GameLogic::lycanTurn(){
-	say("Werewolf open eyes");
+	say("狼人请睁眼");
 	if(this->status->isFirstLoop){
-		say("Werewolf confirm identity");
+		say("狼人请按任意键确认");
 		this->roleChangeMore(R_CITIZEN,R_LYCAN,LYCAN_NUMBER);
 	}
 	delay(S_TIME);
-	say("Werewolf pick someone to kill");
+	say("狼人请刀人");
 	this->tstatus->lycanKillId = this->selectOneWithAllowRole(30000,R_LYCAN,false);
-	say("Werewolf close eyes");
+	say("狼人请闭眼");
 }
 
 void GameLogic::witchTurn(){
-	say("Witch open eyes");
+	say("女巫请睁眼");
 	if(this->status->isFirstLoop){
-		say("Witch confirm identity");
+		say("女巫请按任意键确认");
 		this->status->witchId = this->roleChangeOnce(R_CITIZEN,R_WITCH);
 	}
 	delay(S_TIME);
@@ -188,12 +191,14 @@ void GameLogic::witchTurn(){
 	if(this->isPlayerAlive(this->status->witchId)){
 
 		// use cure
-		say("Tonight's victim is");
+		say("今晚的受害者是");
 		uint16_t g = 0;
 		uint16_t r = this->status->usedCure ? 0 : this->clientIdToBinary(this->tstatus->lycanKillId);
 		this->conn->outputLight(g,r);
-		delay(M_TIME);
-		say("Do you want to save this guy?");
+		delay(S_TIME);
+		this->powerOffAllLight();
+		delay(S_TIME);
+		say("你要使用解药吗");
 
 		bool ableToUseCure = (!this->status->usedCure) && this->tstatus->lycanKillId == this->status->witchId && this->status->isFirstLoop;
 
@@ -211,7 +216,7 @@ void GameLogic::witchTurn(){
 		}
 
 		// use posion
-		say("Do you want to posion someone?");
+		say("你要使用毒药吗");
 		
 		if((!this->status->usedPosion) && (!this->tstatus->witchSaved)){
 			this->tstatus->witchPosionId = this->selectOneWithAllowRole(30000,R_WITCH,false);
@@ -220,31 +225,31 @@ void GameLogic::witchTurn(){
 			delay(L_TIME);
 		}
 	}else{
-		say("Tonight's victim is");
+		say("今晚的受害者是");
 		delay(M_TIME);
-		say("Do you want to save this guy?");
+		say("你要使用解药吗");
 		delay(L_TIME);
-		say("Do you want to posion someone?");
+		say("你要使用毒药吗");
 		delay(L_TIME);
 	}
 
 
-	say("Witch close eyes");
+	say("女巫请闭眼");
 }
 
 void GameLogic::seerTurn(){
-	say("Seer open eyes");
+	say("预言家请睁眼");
 	if(this->status->isFirstLoop){
-		say("Seer confirm identity");
+		say("预言家请按任意键确认身份");
 		this->status->seerId = this->roleChangeOnce(R_CITIZEN,R_SEER);
 	}
 	delay(S_TIME);
 	if(this->isPlayerAlive(this->status->seerId)){
-		say("Seer pick someone to testify");
+		say("预言家请选择验人");
 		Pid id = this->selectOneWithAllowRole(30000,R_SEER,true);
 		uint16_t l = this->clientIdToBinary(id);
 
-		say("The result of this guy is");
+		say("该玩家为");
 		if(this->status->playerRole[id-1] == R_LYCAN)
 			this->conn->outputLight(0,l);
 		else
@@ -253,24 +258,24 @@ void GameLogic::seerTurn(){
 		this->powerOffAllLight();
 
 	}else{
-		say("Seer pick someone to testify");
+		say("预言家请选择验人");
 		delay(L_TIME);
-		say("The result of this guy is");
+		say("该玩家为");
 		delay(S_TIME);
 	}
-	say("Seer close eyes");
+	say("预言家请闭眼");
 }
 
 void GameLogic::hunterTurn(){
-	say("Hunter open eyes");
+	say("猎人请睁眼");
 	if(this->status->isFirstLoop){
-		say("Hunter confirm identity");
+		say("猎人请按任意键确认身份");
 		this->status->hunterId = this->roleChangeOnce(R_CITIZEN,R_HUNTER);
 	}
-	delay(S_TIME);
+	
 
 	if(this->isPlayerAlive(this->status->hunterId)){
-		say("Tonight your ability status is");
+		say("今晚你的技能状态为");
 		uint16_t l = this->clientIdToBinary(this->status->hunterId);
 		bool ableToUseAbility = this->status->hunterId == this->tstatus->lycanKillId;
 
@@ -280,36 +285,36 @@ void GameLogic::hunterTurn(){
 			this->conn->outputLight(0,l);
 		delay(S_TIME);
 		this->powerOffAllLight();
-		say("Do you want to use your ability?");
+		say("你要使用技能吗");
 		if(ableToUseAbility)
 			this->tstatus->hunterEnableSkill = this->confirmWithRole(R_HUNTER,30000,this->status->hunterId);
 		else
 			delay(M_TIME);
 	}else{
-		say("Tonight your ability status is");
+		say("今晚你的技能状态为");
 		delay(S_TIME);
-		say("Do you want to use your ability?");
+		say("你要使用技能吗");
 		delay(L_TIME);
 	}
 
 	delay(S_TIME);
-	say("Hunter close eyes");
+	say("猎人请闭眼");
 }
 
 void GameLogic::moronTurn(){
-	say("Moron open eyes");
 	if(this->status->isFirstLoop){
-		say("Moron confirm identity");
+    say("白痴请睁眼");
+		say("白痴请确认身份");
 		this->status->moronId = this->roleChangeOnce(R_CITIZEN,R_MORON);
+    delay(S_TIME);
+    say("白痴请闭眼");
 	}
-	delay(S_TIME);
-	say("moron close eyes");
 }
 
 void GameLogic::sheirffCampagin(){
-	say("Now start sheirff campagin, new sheriff will click anykey to confirm identity");
+	say("现在开始警长竞选");
 	this->status->sheriffId =  this->confirmOneIdentity(true);
-	say(String("New sheirff will be player ") + this->status->sheriffId);
+	say(String("新的警长为 ") + this->status->sheriffId + " 号玩家");
 	uint16_t l = this->clientIdToBinary(this->status->sheriffId);
 	this->conn->outputLight(l,0);
 	delay(S_TIME);
@@ -318,30 +323,28 @@ void GameLogic::sheirffCampagin(){
 
 void GameLogic::changeSheirff(){
 	if((!this->status->badgeLost) && (!this->isPlayerAlive(this->status->sheriffId))){
-		this->markPlayerAlive(this->status->sheriffId);
-		say("Sheirff please select a new sheirff");
+		
+		say("请警长选择继任者");
 		Pid newS = this->selectOneWithAllowId(30000,this->status->sheriffId,true);
 		if(newS==0 || (!this->isPlayerAlive(newS)) || newS == this->status->sheriffId){
 			this->status->badgeLost = true;
-			say("Fail to select new sheriff, badge lost forever!");
+			say("警长放弃选择继任者，从此以后没有警长");
 			delay(S_TIME);
 		}else{
-			say(String("New Sheirff will be player ") + newS);
+			say(String("新的警长为 ") + this->status->sheriffId + " 号玩家");
+			this->status->sheriffId = newS;
 			uint16_t l = this->clientIdToBinary(newS);
 			this->conn->outputLight(l,0);
 			delay(S_TIME);
 			this->powerOffAllLight();
 		}
-		this->markPlayerDie(this->status->sheriffId);
 	}
 }
 
 void GameLogic::hunterSkill(){
-	this->markPlayerAlive(this->status->hunterId);
-	say("Please select one to kill");
+	say("请选择带走玩家");
 	Pid die = this->selectOneWithAllowId(30000,this->status->hunterId,false);
 	this->markPlayerDie(die);
-	this->markPlayerDie(this->status->hunterId);
 }
 
 void GameLogic::moronSkill(){
@@ -351,21 +354,21 @@ void GameLogic::moronSkill(){
 }
 
 void GameLogic::startSpeech(uint16_t speechList, Pid holderId, unsigned long eachTimeout){
-	say("Now start speech");
-	delay(eachTimeout);
+	say("现在开始轮流发言");
+	delay(M_TIME);
 }
 
 void GameLogic::voteForSuspect(){
-	say("Now start voting. The suspect please click anykey");
+	say("现在开始投票");
 	this->tstatus->suspectId =  this->confirmOneIdentity(false);
-	say(String("The suspect is") + this->tstatus->suspectId);
+	say(String("") + this->tstatus->suspectId + " 号玩家被投票出局");
 }
 
 void GameLogic::reportSuvivor(){
 	this->powerOffAllLight();
-	say("Today's survivors are");
+	say("目前的幸存者为");
 	uint16_t l = this->status->playerAlive;
-	this->conn->outputLight(0,l);
+	this->conn->outputLight(l,0);
 	delay(M_TIME);
 	this->powerOffAllLight();
 }
@@ -373,13 +376,13 @@ void GameLogic::reportSuvivor(){
 void GameLogic::reportVictim(uint16_t deadList){
 	this->powerOffAllLight();
 	if(deadList){
-		say("Yesterday's victim is");
+		say("昨夜死亡的玩家为");
 		uint16_t l = deadList;
 		this->conn->outputLight(0,l);
 		delay(M_TIME);
 		this->powerOffAllLight();
 	}else{
-		say("Yesterday nobody die");
+		say("昨夜是平安夜，无人死亡");
 		delay(S_TIME);
 	}
 }
@@ -419,12 +422,12 @@ void GameLogic::onDay(){
 	this->startSpeech(this->status->playerAlive,holder,120000);
 	this->voteForSuspect();
 	if(this->tstatus->suspectId == this->status->hunterId){
-		say("Do you want to use your ability?");
+		say("你要使用你的技能吗");
 		if(this->confirmWithRole(R_HUNTER,30000,this->status->hunterId))
 			this->hunterSkill();
 	}
 	if(this->tstatus->suspectId == this->status->moronId){
-		say("Do you want to use your ability?");
+		say("你要使用你的技能吗");
 		if(this->confirmWithRole(R_MORON,30000,this->status->moronId))
 			this->moronSkill();
 	}
@@ -605,7 +608,7 @@ Pid GameLogic::selectOneWithAllowId(unsigned long timeout,Pid allow,bool usingGr
 	while(timeout == 0 || (current - startTime) < timeout){
 		current = millis();
 		if(this->conn->input(id,btn)){
-			if(this->status->playerRole[id - 1] == allow && this->isPlayerAlive(id)){
+			if(id == allow){
 				if(btn == 3){
 					delay(XS_TIME);
 					this->powerOffAllLight();
