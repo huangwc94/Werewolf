@@ -5,7 +5,7 @@
 #include "Arduino.h"
 
 /**
-* 
+*
 * Game Configuation
 */
 #define PLAYER_NUMBER 12 // should be less than 16 player
@@ -56,7 +56,7 @@ typedef struct{
 	bool badgeLost;
 } GameStatus;
 
-typedef struct 
+typedef struct
 {
 	Pid lycanKillId;
 	Pid witchPosionId;

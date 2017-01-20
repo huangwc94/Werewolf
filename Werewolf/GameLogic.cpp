@@ -1,7 +1,7 @@
 #include "GameLogic.h"
 
 GameLogic::GameLogic(){
-	
+
 }
 
 GameLogic::~GameLogic(){
@@ -55,7 +55,7 @@ void GameLogic::loop(){
 	say("天黑请闭眼");
 	this->onNight();
 	this->powerOffAllLight();
-	
+
 	say("天亮请睁眼");
 	this->onDay();
 
@@ -74,7 +74,6 @@ void GameLogic::checkResult(){
   uint8_t godRemain = 0;
 
   for(int i = 0;i<PLAYER_NUMBER;i++){
-
   	if(!this->isPlayerAlive(i+1))
   		continue;
 
@@ -110,7 +109,7 @@ void GameLogic::checkResult(){
   	while(1);
   }
   //Serial.println(String("Game is not over! ") + werewolfRemain + " werewolves remain. " + citizenRemain + " citizens remain. " + godRemain + " god remain.");
-  
+
 }
 
 Pid GameLogic::previousAlivePlayer(Pid select){
@@ -119,12 +118,12 @@ Pid GameLogic::previousAlivePlayer(Pid select){
 	}
 	select--;
 	if(select <= 0 || select > PLAYER_NUMBER){
-		select = PLAYER_NUMBER;  
+		select = PLAYER_NUMBER;
 	}
 	while(!this->isPlayerAlive(select)){
 		select--;
 		if(select <= 0 || select > PLAYER_NUMBER){
-			select = PLAYER_NUMBER;  
+			select = PLAYER_NUMBER;
 		}
 	}
 	return select;
@@ -136,12 +135,12 @@ Pid GameLogic::nextAlivePlayer(Pid select){
 	}
 	select++;
 	if(select > PLAYER_NUMBER){
-		select = 1;  
+		select = 1;
 	}
 	while(!this->isPlayerAlive(select)){
 		select++;
 		if(select > PLAYER_NUMBER){
-			select = 1;  
+			select = 1;
 		}
 	}
 	return select;
@@ -203,7 +202,7 @@ void GameLogic::witchTurn(){
 		bool ableToUseCure = (!this->status->usedCure) && this->tstatus->lycanKillId == this->status->witchId && this->status->isFirstLoop;
 
 		ableToUseCure = ableToUseCure || (!this->status->usedCure && this->tstatus->lycanKillId > 0);
-		
+
 		if(ableToUseCure){
 			bool result = this->confirmWithRole(R_WITCH,30000,this->tstatus->lycanKillId);
 			if(result){
@@ -217,7 +216,7 @@ void GameLogic::witchTurn(){
 
 		// use posion
 		say("你要使用毒药吗");
-		
+
 		if((!this->status->usedPosion) && (!this->tstatus->witchSaved)){
 			this->tstatus->witchPosionId = this->selectOneWithAllowRole(30000,R_WITCH,false);
 			this->status->usedPosion = this->tstatus->witchPosionId != 0;
@@ -272,7 +271,7 @@ void GameLogic::hunterTurn(){
 		say("猎人请按任意键确认身份");
 		this->status->hunterId = this->roleChangeOnce(R_CITIZEN,R_HUNTER);
 	}
-	
+
 
 	if(this->isPlayerAlive(this->status->hunterId)){
 		say("今晚你的技能状态为");
@@ -323,7 +322,7 @@ void GameLogic::sheirffCampagin(){
 
 void GameLogic::changeSheirff(){
 	if((!this->status->badgeLost) && (!this->isPlayerAlive(this->status->sheriffId))){
-		
+
 		say("请警长选择继任者");
 		Pid newS = this->selectOneWithAllowId(30000,this->status->sheriffId,true);
 		if(newS==0 || (!this->isPlayerAlive(newS)) || newS == this->status->sheriffId){
