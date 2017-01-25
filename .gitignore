@@ -51,3 +51,7 @@ Temporary Items
 
 node_modules/
 .idea/
+.pioenvs
+.piolibdeps
+.clang_complete
+.gcc-flags.json
