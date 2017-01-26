@@ -15,8 +15,9 @@ void GameLogic::init(){
 	#endif
 
 	#ifdef DRIVER_TYPE_HARDWARE
-	// TO DO:
-	// 1. Add driver implementation
+	HardwareDriver *driver = new HardwareDriver(PLAYER_NUMBER);
+	conn = driver;
+	say("Debug:Using HardwareDriver");
 	#endif
 
 	say("欢迎使用狼人杀电子法官，版本号："+__VERSION);

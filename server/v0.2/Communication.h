@@ -5,6 +5,7 @@
 
 	#define STOP_CHAR '$'
 
+	#define DEBUG
 
 	class Driver{
 		public:
@@ -31,13 +32,17 @@
 			void clearBuffer();
 	};
 
-	// class HardwareDriver:Driver{
-
-	// };
+	class HardwareDriver:Driver{
+		public:
+			HardwareDriver(uint8_t playerNumber);
+			void outputString(String);
+			void outputLight(const uint16_t g,const uint16_t r);
+			bool input(uint8_t &id, uint8_t &btn);
+			void clearBuffer();
+		private:
+			uint16_t g,r,playerNumber;
+			uint8_t currentSlaveId;
+	};
 
 
 #endif
-
-
-
-
