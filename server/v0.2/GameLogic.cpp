@@ -19,9 +19,11 @@ void GameLogic::init(){
 	conn = driver;
 	say("Debug:Using HardwareDriver");
 	#endif
+	delay(100);
+	this->powerOffAllLight();
 	say("正在检测手柄状态");
 	this->checkClient();
-	say("欢迎使用狼人杀电子法官，版本号："+__VERSION);
+	say(String("欢迎使用狼人杀电子法官，版本号：")+__VERSION);
 	delay(M_TIME);
 	this->powerOnAllLight();
 
@@ -664,13 +666,16 @@ void GameLogic::showIdentity(){
 }
 
 void GameLogic::checkClient(){
+	this->powerOnAllLight();
+	delay(1000);
 	this->powerOffAllLight();
 	delay(1000);
 
 	for(int i = 1;i<=PLAYER_NUMBER;i++){
 		uint16_t l = this->clientIdToBinary(i);
 		this->conn->outputLight(l,l);
-		delay(1000);
+		say(String(i));
+		delay(400);
 	}
 	delay(1000);
 	this->powerOnAllLight();
