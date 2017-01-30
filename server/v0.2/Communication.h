@@ -32,7 +32,7 @@
 			void clearBuffer();
 	};
 
-	class HardwareDriver:Driver{
+	class HardwareDriver:public Driver{
 		public:
 			HardwareDriver(uint8_t playerNumber);
 			void outputString(String);
