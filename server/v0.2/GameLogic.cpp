@@ -374,12 +374,11 @@ void GameLogic::changeSheirff(){
 			say("警长放弃选择继任者，从此以后没有警长");
 			delay(S_TIME);
 		}else{
+			this->status->sheriffId = newS;
 			this->conn->playSound(34);
 			say(String("新的警长为"));
 			this->conn->playSound(34 + this->status->sheriffId);
 			say(String(this->status->sheriffId) + "号玩家");
-
-			this->status->sheriffId = newS;
 			uint16_t l = this->clientIdToBinary(newS);
 			this->conn->outputLight(l,0);
 			delay(S_TIME);
