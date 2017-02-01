@@ -46,8 +46,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-*.mp3
-*.wav
 
 node_modules/
 .idea/

@@ -21,9 +21,11 @@ void GameLogic::init(){
 	#endif
 	delay(100);
 	this->powerOffAllLight();
+	this->conn->playSound(1);
 	say("正在检测手柄状态");
 	this->checkClient();
-	say(String("欢迎使用狼人杀电子法官，版本号：")+__VERSION);
+	this->conn->playSound(2);
+	say(String("欢迎使用狼人杀电子法官"));
 	delay(M_TIME);
 	this->powerOnAllLight();
 
@@ -42,10 +44,8 @@ void GameLogic::init(){
 	this->status->usedCure = false;
 	this->status->badgeLost = false;
 	this->tstatus = malloc(sizeof(TurnStatus));
-
+	this->conn->playSound(3);
 	say("游戏开始");
-
-
 }
 void GameLogic::loop(){
 	// init turn status
@@ -56,10 +56,11 @@ void GameLogic::loop(){
 	this->tstatus->hunterEnableSkill = false;
 
 	this->powerOffAllLight();
+	this->conn->playSound(4);
 	say("天黑请闭眼");
 	this->onNight();
 	this->powerOffAllLight();
-
+	this->conn->playSound(5);
 	say("天亮请睁眼");
 	this->onDay();
 
@@ -90,24 +91,30 @@ void GameLogic::checkResult(){
   }
 
   if(werewolfRemain==0 && (citizenRemain==0 || godRemain==0)){
+		this->conn->playSound(6);
   	this->say("游戏结束，获胜的一方是");
-  	delay(L_TIME);
+  	delay(M_TIME);
+		this->conn->playSound(7);
   	this->say("平局，所有玩家获胜！");
   	this->showIdentity();
   	while(1);
   }
 
   if(werewolfRemain==0){
+		this->conn->playSound(6);
   	this->say("游戏结束，获胜的一方是");
-  	delay(L_TIME);
+  	delay(M_TIME);
+		this->conn->playSound(8);
   	this->say("好人阵营获胜！");
   	this->showIdentity();
   	while(1);
   }
 
   if(citizenRemain==0 || godRemain==0){
+		this->conn->playSound(6);
   	this->say("游戏结束，获胜的一方是");
-  	delay(L_TIME);
+  	delay(M_TIME);
+		this->conn->playSound(9);
   	this->say("狼人阵营获胜！");
   	this->showIdentity();
   	while(1);
@@ -172,20 +179,26 @@ void GameLogic::markPlayerAlive(Pid id){
 
 // logic proc
 void GameLogic::lycanTurn(){
+	this->conn->playSound(10);
 	say("狼人请睁眼");
 	if(this->status->isFirstLoop){
+		this->conn->playSound(11);
 		say("狼人请按任意键确认");
 		this->roleChangeMore(R_CITIZEN,R_LYCAN,LYCAN_NUMBER);
 	}
 	delay(S_TIME);
+	this->conn->playSound(12);
 	say("狼人请刀人");
 	this->tstatus->lycanKillId = this->selectOneWithAllowRole(30000,R_LYCAN,false);
+	this->conn->playSound(13);
 	say("狼人请闭眼");
 }
 
 void GameLogic::witchTurn(){
+	this->conn->playSound(14);
 	say("女巫请睁眼");
 	if(this->status->isFirstLoop){
+		this->conn->playSound(15);
 		say("女巫请按任意键确认");
 		this->status->witchId = this->roleChangeOnce(R_CITIZEN,R_WITCH);
 	}
@@ -194,6 +207,7 @@ void GameLogic::witchTurn(){
 	if(this->isPlayerAlive(this->status->witchId)){
 
 		// use cure
+		this->conn->playSound(16);
 		say("今晚的受害者是");
 		uint16_t g = 0;
 		uint16_t r = this->status->usedCure ? 0 : this->clientIdToBinary(this->tstatus->lycanKillId);
@@ -201,6 +215,7 @@ void GameLogic::witchTurn(){
 		delay(S_TIME);
 		this->powerOffAllLight();
 		delay(S_TIME);
+		this->conn->playSound(17);
 		say("你要使用解药吗");
 
 		bool ableToUseCure = (!this->status->usedCure) && this->tstatus->lycanKillId == this->status->witchId && this->status->isFirstLoop;
@@ -219,6 +234,7 @@ void GameLogic::witchTurn(){
 		}
 
 		// use posion
+		this->conn->playSound(18);
 		say("你要使用毒药吗");
 
 		if((!this->status->usedPosion) && (!this->tstatus->witchSaved)){
@@ -228,30 +244,36 @@ void GameLogic::witchTurn(){
 			delay(L_TIME);
 		}
 	}else{
+		this->conn->playSound(16);
 		say("今晚的受害者是");
 		delay(M_TIME);
+		this->conn->playSound(17);
 		say("你要使用解药吗");
 		delay(L_TIME);
+		this->conn->playSound(18);
 		say("你要使用毒药吗");
 		delay(L_TIME);
 	}
 
-
+	this->conn->playSound(19);
 	say("女巫请闭眼");
 }
 
 void GameLogic::seerTurn(){
+	this->conn->playSound(20);
 	say("预言家请睁眼");
 	if(this->status->isFirstLoop){
+		this->conn->playSound(21);
 		say("预言家请按任意键确认身份");
 		this->status->seerId = this->roleChangeOnce(R_CITIZEN,R_SEER);
 	}
 	delay(S_TIME);
 	if(this->isPlayerAlive(this->status->seerId)){
+		this->conn->playSound(22);
 		say("预言家请选择验人");
 		Pid id = this->selectOneWithAllowRole(30000,R_SEER,true);
 		uint16_t l = this->clientIdToBinary(id);
-
+		this->conn->playSound(23);
 		say("该玩家为");
 		if(this->status->playerRole[id-1] == R_LYCAN)
 			this->conn->outputLight(0,l);
@@ -261,23 +283,29 @@ void GameLogic::seerTurn(){
 		this->powerOffAllLight();
 
 	}else{
+		this->conn->playSound(22);
 		say("预言家请选择验人");
 		delay(L_TIME);
+		this->conn->playSound(23);
 		say("该玩家为");
 		delay(S_TIME);
 	}
+	this->conn->playSound(24);
 	say("预言家请闭眼");
 }
 
 void GameLogic::hunterTurn(){
+	this->conn->playSound(25);
 	say("猎人请睁眼");
 	if(this->status->isFirstLoop){
+		this->conn->playSound(26);
 		say("猎人请按任意键确认身份");
 		this->status->hunterId = this->roleChangeOnce(R_CITIZEN,R_HUNTER);
 	}
 
 
 	if(this->isPlayerAlive(this->status->hunterId)){
+		this->conn->playSound(27);
 		say("今晚你的技能状态为");
 		uint16_t l = this->clientIdToBinary(this->status->hunterId);
 		bool ableToUseAbility = this->status->hunterId == this->tstatus->lycanKillId;
@@ -288,36 +316,47 @@ void GameLogic::hunterTurn(){
 			this->conn->outputLight(0,l);
 		delay(S_TIME);
 		this->powerOffAllLight();
+		this->conn->playSound(28);
 		say("你要使用技能吗");
 		if(ableToUseAbility)
 			this->tstatus->hunterEnableSkill = this->confirmWithRole(R_HUNTER,30000,this->status->hunterId);
 		else
 			delay(M_TIME);
 	}else{
+		this->conn->playSound(27);
 		say("今晚你的技能状态为");
 		delay(S_TIME);
+		this->conn->playSound(28);
 		say("你要使用技能吗");
 		delay(L_TIME);
 	}
 
 	delay(S_TIME);
+	this->conn->playSound(29);
 	say("猎人请闭眼");
 }
 
 void GameLogic::moronTurn(){
 	if(this->status->isFirstLoop){
+		this->conn->playSound(30);
     say("白痴请睁眼");
+		this->conn->playSound(31);
 		say("白痴请确认身份");
 		this->status->moronId = this->roleChangeOnce(R_CITIZEN,R_MORON);
     delay(S_TIME);
+		this->conn->playSound(32);
     say("白痴请闭眼");
 	}
 }
 
 void GameLogic::sheirffCampagin(){
+	this->conn->playSound(33);
 	say("现在开始警长竞选");
 	this->status->sheriffId =  this->confirmOneIdentity(true);
-	say(String("新的警长为 ") + this->status->sheriffId + " 号玩家");
+	this->conn->playSound(34);
+	say(String("新的警长为"));
+	this->conn->playSound(34 + this->status->sheriffId);
+	say(String(this->status->sheriffId) + "号玩家");
 	uint16_t l = this->clientIdToBinary(this->status->sheriffId);
 	this->conn->outputLight(l,0);
 	delay(S_TIME);
@@ -326,15 +365,20 @@ void GameLogic::sheirffCampagin(){
 
 void GameLogic::changeSheirff(){
 	if((!this->status->badgeLost) && (!this->isPlayerAlive(this->status->sheriffId))){
-
+		this->conn->playSound(47);
 		say("请警长选择继任者");
 		Pid newS = this->selectOneWithAllowId(30000,this->status->sheriffId,true);
 		if(newS==0 || (!this->isPlayerAlive(newS)) || newS == this->status->sheriffId){
 			this->status->badgeLost = true;
+			this->conn->playSound(48);
 			say("警长放弃选择继任者，从此以后没有警长");
 			delay(S_TIME);
 		}else{
-			say(String("新的警长为 ") + this->status->sheriffId + " 号玩家");
+			this->conn->playSound(34);
+			say(String("新的警长为"));
+			this->conn->playSound(34 + this->status->sheriffId);
+			say(String(this->status->sheriffId) + "号玩家");
+
 			this->status->sheriffId = newS;
 			uint16_t l = this->clientIdToBinary(newS);
 			this->conn->outputLight(l,0);
@@ -345,6 +389,7 @@ void GameLogic::changeSheirff(){
 }
 
 void GameLogic::hunterSkill(){
+	this->conn->playSound(49);
 	say("请选择带走玩家");
 	Pid die = this->selectOneWithAllowId(30000,this->status->hunterId,false);
 	this->markPlayerDie(die);
@@ -357,18 +402,24 @@ void GameLogic::moronSkill(){
 }
 
 void GameLogic::startSpeech(uint16_t speechList, Pid holderId, unsigned long eachTimeout){
+	this->conn->playSound(50);
 	say("现在开始轮流发言");
 	delay(M_TIME);
 }
 
 void GameLogic::voteForSuspect(){
+	this->conn->playSound(51);
 	say("现在开始投票");
 	this->tstatus->suspectId =  this->confirmOneIdentity(false);
-	say(String("") + this->tstatus->suspectId + " 号玩家被投票出局");
+	this->conn->playSound(34 + this->tstatus->suspectId);
+	say(String(this->tstatus->suspectId) + "号玩家");
+	this->conn->playSound(52);
+	say("被投票出局");
 }
 
 void GameLogic::reportSuvivor(){
 	this->powerOffAllLight();
+	this->conn->playSound(53);
 	say("目前的幸存者为");
 	uint16_t l = this->status->playerAlive;
 	this->conn->outputLight(l,0);
@@ -379,12 +430,14 @@ void GameLogic::reportSuvivor(){
 void GameLogic::reportVictim(uint16_t deadList){
 	this->powerOffAllLight();
 	if(deadList){
+		this->conn->playSound(54);
 		say("昨夜死亡的玩家为");
 		uint16_t l = deadList;
 		this->conn->outputLight(0,l);
 		delay(M_TIME);
 		this->powerOffAllLight();
 	}else{
+		this->conn->playSound(55);
 		say("昨夜是平安夜，无人死亡");
 		delay(S_TIME);
 	}
@@ -425,12 +478,14 @@ void GameLogic::onDay(){
 	this->startSpeech(this->status->playerAlive,holder,120000);
 	this->voteForSuspect();
 	if(this->tstatus->suspectId == this->status->hunterId){
-		say("你要使用你的技能吗");
+		this->conn->playSound(28);
+		say("你要使用技能吗");
 		if(this->confirmWithRole(R_HUNTER,30000,this->status->hunterId))
 			this->hunterSkill();
 	}
 	if(this->tstatus->suspectId == this->status->moronId){
-		say("你要使用你的技能吗");
+		this->conn->playSound(28);
+		say("你要使用技能吗");
 		if(this->confirmWithRole(R_MORON,30000,this->status->moronId))
 			this->moronSkill();
 	}
@@ -674,7 +729,8 @@ void GameLogic::checkClient(){
 	for(int i = 1;i<=PLAYER_NUMBER;i++){
 		uint16_t l = this->clientIdToBinary(i);
 		this->conn->outputLight(l,l);
-		say(String(i));
+		this->conn->playSound(34 + i);
+		say(String(i) + "号玩家");
 		delay(400);
 	}
 	delay(1000);
