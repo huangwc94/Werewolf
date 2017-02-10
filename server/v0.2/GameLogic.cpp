@@ -53,11 +53,11 @@ void GameLogic::loop(){
 	this->tstatus->lycanKillId = 0;
 	this->tstatus->witchPosionId = 0;
 	this->tstatus->witchSaved = false;
-	this->tstatus->hunterEnableSkill = false;
 
 	this->powerOffAllLight();
 	this->conn->playSound(4);
 	say("天黑请闭眼");
+	delay(L_TIME);
 	this->onNight();
 	this->powerOffAllLight();
 	this->conn->playSound(5);
@@ -308,27 +308,20 @@ void GameLogic::hunterTurn(){
 		this->conn->playSound(27);
 		say("今晚你的技能状态为");
 		uint16_t l = this->clientIdToBinary(this->status->hunterId);
-		bool ableToUseAbility = this->status->hunterId == this->tstatus->lycanKillId;
+		bool ableToUseAbility = this->status->hunterId != this->tstatus->witchPosionId;
 
 		if(ableToUseAbility)
 			this->conn->outputLight(l,0);
 		else
 			this->conn->outputLight(0,l);
-		delay(S_TIME);
+		delay(M_TIME);
 		this->powerOffAllLight();
-		this->conn->playSound(28);
-		say("你要使用技能吗");
-		if(ableToUseAbility)
-			this->tstatus->hunterEnableSkill = this->confirmWithRole(R_HUNTER,30000,this->status->hunterId);
-		else
-			delay(M_TIME);
+		delay(M_TIME);
 	}else{
 		this->conn->playSound(27);
 		say("今晚你的技能状态为");
-		delay(S_TIME);
-		this->conn->playSound(28);
-		say("你要使用技能吗");
-		delay(L_TIME);
+		delay(M_TIME);
+		delay(M_TIME);
 	}
 
 	delay(S_TIME);
@@ -468,9 +461,16 @@ void GameLogic::onDay(){
 
 	this->reportVictim(dlist);
 	this->reportSuvivor();
-	if(this->tstatus->hunterEnableSkill){
-		this->hunterSkill();
+
+	if(this->status->hunterId != this->tstatus->witchPosionId && this->tstatus->lycanKillId == this->status->hunterId){
+		this->conn->playSound(28);
+		say("你要使用技能吗");
+		this->markPlayerAlive(this->status->hunterId);
+		if(this->confirmWithRole(R_HUNTER,30000,this->status->hunterId))
+			this->hunterSkill();
+		this->markPlayerDie(this->status->hunterId);
 	}
+
 	this->checkResult();
 	this->changeSheirff();
 	Pid holder = this->isPlayerAlive(this->status->sheriffId) ? this->status->sheriffId : this->nextAlivePlayer(1);

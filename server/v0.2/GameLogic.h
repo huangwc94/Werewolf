@@ -62,7 +62,6 @@ typedef struct
 	Pid witchPosionId;
 	bool witchSaved;
 	Pid suspectId;
-	bool hunterEnableSkill;
 
 } TurnStatus;
 

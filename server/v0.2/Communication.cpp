@@ -113,7 +113,7 @@ bool HardwareDriver::input(uint8_t &id, uint8_t &btn){
 		btn = Wire.read();
 		if(btn > 0){
 			id = this->currentSlaveId;
-			delay(250);
+			delay(500);
 			return true;
 		}else{
 			this->currentSlaveId ++;
