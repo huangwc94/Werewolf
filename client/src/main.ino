@@ -26,6 +26,10 @@ void setup(){
   Serial.begin(115200);
   pinMode(JoyStick_Z, INPUT);
   pinMode(JoyStick_Z,INPUT_PULLUP);
+
+  pinMode(13,OUTPUT);
+  digitalWrite(13,LOW);
+
 }
 
 void loop(){
