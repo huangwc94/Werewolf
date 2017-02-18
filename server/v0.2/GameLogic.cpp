@@ -189,7 +189,7 @@ void GameLogic::lycanTurn(){
 	delay(S_TIME);
 	this->conn->playSound(12);
 	say("狼人请刀人");
-	this->tstatus->lycanKillId = this->selectOneWithAllowRole(30000,R_LYCAN,false);
+	this->tstatus->lycanKillId = this->selectOneWithAllowRole(0,R_LYCAN,false);
 	this->conn->playSound(13);
 	say("狼人请闭眼");
 }
@@ -238,7 +238,7 @@ void GameLogic::witchTurn(){
 		say("你要使用毒药吗");
 
 		if((!this->status->usedPosion) && (!this->tstatus->witchSaved)){
-			this->tstatus->witchPosionId = this->selectOneWithAllowRole(30000,R_WITCH,false);
+			this->tstatus->witchPosionId = this->selectOneWithAllowRole(0,R_WITCH,false);
 			this->status->usedPosion = this->tstatus->witchPosionId != 0;
 		}else{
 			delay(L_TIME);
@@ -271,7 +271,7 @@ void GameLogic::seerTurn(){
 	if(this->isPlayerAlive(this->status->seerId)){
 		this->conn->playSound(22);
 		say("预言家请选择验人");
-		Pid id = this->selectOneWithAllowRole(30000,R_SEER,true);
+		Pid id = this->selectOneWithAllowRole(0,R_SEER,true);
 		uint16_t l = this->clientIdToBinary(id);
 		this->conn->playSound(23);
 		say("该玩家为");
@@ -314,14 +314,14 @@ void GameLogic::hunterTurn(){
 			this->conn->outputLight(l,0);
 		else
 			this->conn->outputLight(0,l);
-		delay(M_TIME);
+		delay(S_TIME);
 		this->powerOffAllLight();
-		delay(M_TIME);
+		delay(XS_TIME);
 	}else{
 		this->conn->playSound(27);
 		say("今晚你的技能状态为");
 		delay(M_TIME);
-		delay(M_TIME);
+
 	}
 
 	delay(S_TIME);
@@ -383,7 +383,7 @@ void GameLogic::changeSheirff(){
 void GameLogic::hunterSkill(){
 	this->conn->playSound(49);
 	say("请选择带走玩家");
-	Pid die = this->selectOneWithAllowId(30000,this->status->hunterId,false);
+	Pid die = this->selectOneWithAllowId(0,this->status->hunterId,false);
 	this->markPlayerDie(die);
 }
 
@@ -560,7 +560,7 @@ bool GameLogic::confirmWithId(Pid allow, unsigned long timeout,Pid lightsOn){
 	while(timeout==0 || (current - start) <= timeout){
 		current = millis();
 		if(this->conn->input(id,btn) && this->isPlayerAlive(id) && id == allow){
-			if(btn == 3){
+			if(btn == 3 || btn == 5){
 				this->conn->outputLight(l,0);
 				delay(S_TIME);
 				return true;
@@ -586,7 +586,7 @@ bool GameLogic::confirmWithRole(role_t allow, unsigned long timeout,Pid lightsOn
 	while(timeout==0 || (current - start) <= timeout){
 		current = millis();
 		if(this->conn->input(id,btn) && this->isPlayerAlive(id) && (this->status->playerRole[id - 1] == allow || allow == R_ALL)){
-			if(btn == 3){
+			if(btn == 3 || btn == 5){
 				this->conn->outputLight(l,0);
 				delay(S_TIME);
 				this->powerOffAllLight();
@@ -619,7 +619,7 @@ Pid GameLogic::selectOneWithAllowRole(unsigned long timeout,role_t allow,bool us
 		current = millis();
 		if(this->conn->input(id,btn)){
 			if((this->status->playerRole[id - 1] == allow || allow == R_ALL) && this->isPlayerAlive(id)){
-				if(btn == 3){
+				if(btn == 3 || btn == 5){
 					delay(XS_TIME);
 					this->powerOffAllLight();
 					return select;
@@ -666,7 +666,7 @@ Pid GameLogic::selectOneWithAllowId(unsigned long timeout,Pid allow,bool usingGr
 		current = millis();
 		if(this->conn->input(id,btn)){
 			if(id == allow){
-				if(btn == 3){
+				if(btn == 3 || btn == 5){
 					delay(XS_TIME);
 					this->powerOffAllLight();
 					return select;
@@ -728,9 +728,7 @@ void GameLogic::checkClient(){
 	for(int i = 1;i<=PLAYER_NUMBER;i++){
 		uint16_t l = this->clientIdToBinary(i);
 		this->conn->outputLight(l,l);
-		this->conn->playSound(34 + i);
-		say(String(i) + "号玩家");
-		delay(400);
+		delay(500);
 	}
 	delay(1000);
 	this->powerOnAllLight();
