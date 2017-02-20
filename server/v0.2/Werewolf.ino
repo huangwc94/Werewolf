@@ -7,8 +7,6 @@ of c syntex, should be much more clear and easy to read
 */
 
 #include "GameLogic.h"
-
-
 GameLogic game;
 void setup() {
 	game.init();
