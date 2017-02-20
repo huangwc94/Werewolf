@@ -44,7 +44,7 @@ void ComputerDriver::clearBuffer(){
 void ComputerDriver::playSound(uint16_t id){
 	Serial.println(String("PLAY:")+ id);
 	this->sendCommand(STOP_PLAY,0);
-	this->sendCommand(CMD_PLAY_W_INDEX, id * 2 - 1);
+	this->sendCommand(CMD_PLAY_W_INDEX, id);
 }
 
 void ComputerDriver::sendCommand(int8_t command, int16_t dat){
@@ -134,7 +134,7 @@ void HardwareDriver::playSound(uint16_t id){
 	Serial.println(String("PLAY:")+ id);
 	#endif
 	this->sendCommand(STOP_PLAY,0);
-	this->sendCommand(CMD_PLAY_W_INDEX, id * 2 - 1); // This is god damn wired!!!
+	this->sendCommand(CMD_PLAY_W_INDEX, id); // This is god damn wired!!!
 }
 
 void HardwareDriver::sendCommand(int8_t command, int16_t dat){
