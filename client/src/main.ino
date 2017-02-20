@@ -1,9 +1,12 @@
 #include <Wire.h>
-#include "identifier.h"
+
 #define SENSATIVITY 400
 
 // uncommit this to run in debug mode
 //#define DEBUG
+
+// CLIENT ID
+#define CLIENT_ID 2
 
 uint8_t redPin = 12;
 uint8_t greenPin = 8;
