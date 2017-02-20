@@ -3,7 +3,7 @@
  */
 
 //var port = "/dev/cu.usbmodem1421";
-var port = "COM5";
+var port = "COM3";
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);

@@ -110,7 +110,7 @@ class GameLogic
 		void reportSuvivor();
 		void reportVictim(uint16_t deadList);
 		void voteForSuspect();
-		void startSpeech(uint16_t speechList, Pid startId, unsigned long eachTimeout);
+		void startSpeech();
 		// main loop
 		void onNight();
 		void onDay();

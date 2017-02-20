@@ -12,7 +12,8 @@ class Timer{
     unsigned long timeout;
     unsigned long start;
     unsigned long current;
-    bool one,two,three,five,ten;
+    bool one,two,three,five,ten,thy;
+
 };
 
 #endif

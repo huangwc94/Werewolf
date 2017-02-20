@@ -10,6 +10,7 @@ Timer::Timer(unsigned long timeout,Driver * conn){
   this->three = true;
   this->five = true;
   this->ten = true;
+  this->thy = true;
 }
 Timer::~Timer(){
 
@@ -37,6 +38,9 @@ bool Timer::run(){
   }else if (remaining <= 10000 && ten && remaining > 5000){
     this->conn->playSound(62);
     ten = false;
+  }else if (remaining <= 30000 && thy && remaining > 10000){
+    thy = false;
+    this->conn->playSound(66);
   }
   current = millis();
   return remaining >= 0;
