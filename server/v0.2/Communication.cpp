@@ -3,7 +3,7 @@
 ComputerDriver::ComputerDriver(){
 	Serial.begin(115200);
 	buffer = String("");
-	delay(50);
+	delay(100);
 	this->mySerial = new SoftwareSerial(9,10);
 	this->mySerial->begin(9600);
 	delay(500);//Wait chip initialization is complete
@@ -108,7 +108,7 @@ void HardwareDriver::outputLight(const uint16_t g,const uint16_t r){
 }
 
 bool HardwareDriver::input(uint8_t &id, uint8_t &btn){
-	Wire.requestFrom(this->currentSlaveId, 1);
+	Wire.requestFrom((int)this->currentSlaveId, (int)1);
 	if(Wire.available()){
 		btn = Wire.read();
 		if(btn > 0){
