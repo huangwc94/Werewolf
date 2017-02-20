@@ -9,7 +9,7 @@ for(var i in lines){
   var id = lines[i].split(":")[0];
   var text = lines[i].split(":")[1];
   filen = numFmt(id,"000")+".wav";
-  say.export(text, 'Ting-Ting', 1.1, "data/" + filen, function(err) {
+  say.export(text, 'Ting-Ting', 1.1, "output/" + filen, function(err) {
     if (err) {
       return console.error(err);
     }else{
