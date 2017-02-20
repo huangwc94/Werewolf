@@ -724,13 +724,44 @@ void GameLogic::checkClient(){
 	delay(1000);
 	this->powerOffAllLight();
 	delay(1000);
-
+	uint16_t r = 0;
+	uint16_t g = 0;
 	for(int i = 1;i<=PLAYER_NUMBER;i++){
-		uint16_t l = this->clientIdToBinary(i);
-		this->conn->outputLight(l,l);
-		delay(500);
+		for(int j = i ; j <= PLAYER_NUMBER - i + 1;j++){
+			int q = PLAYER_NUMBER - j + 1;
+			uint16_t l1 = this->clientIdToBinary(q);
+			uint16_t l2 = this->clientIdToBinary(j);
+			g |= l1;
+			r |= l2;
+			this->conn->outputLight(g,r);
+			delay(40);
+			g &= ~l1;
+			r &= ~l2;
+		}
+		g |= this->clientIdToBinary(i);
+		r |= this->clientIdToBinary(PLAYER_NUMBER - i + 1);
+		this->conn->outputLight(g, r);
+	}
+	r = 0;
+	g = 0;
+	this->conn->outputLight(g, r);
+	for(int i = 1;i<=PLAYER_NUMBER;i++){
+		for(int j = i ; j <= PLAYER_NUMBER - i + 1;j++){
+			int q = PLAYER_NUMBER - j + 1;
+			uint16_t l2 = this->clientIdToBinary(q);
+			uint16_t l1 = this->clientIdToBinary(j);
+			g |= l1;
+			r |= l2;
+			this->conn->outputLight(g,r);
+			delay(40);
+			g &= ~l1;
+			r &= ~l2;
+
+		}
+		r |= this->clientIdToBinary(i);
+		g |= this->clientIdToBinary(PLAYER_NUMBER - i + 1);
+		this->conn->outputLight(g, r);
 	}
 	delay(1000);
 	this->powerOnAllLight();
-
 }
