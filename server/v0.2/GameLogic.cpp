@@ -54,9 +54,7 @@ void GameLogic::loop(){
 	this->tstatus->lycanKillId = 0;
 	this->tstatus->witchPosionId = 0;
 	this->tstatus->witchSaved = false;
-	//this->sheirffCampagin();
-	//this->startSpeech();
-	this->voteForSuspect();
+
 	this->powerOffAllLight();
 	this->conn->playSound(4);
 	say("天黑请闭眼");
