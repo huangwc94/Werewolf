@@ -25,8 +25,8 @@ void GameLogic::init(){
 	say("正在检测手柄状态");
 	this->checkClient();
 	this->conn->playSound(2);
-	say("欢迎使用狼人杀电子法官");
-	delay(S_TIME);
+	say(String("欢迎使用狼人杀电子法官"));
+	delay(M_TIME);
 	this->powerOnAllLight();
 
 	this->status = (GameStatus*)malloc(sizeof(GameStatus));
@@ -45,7 +45,6 @@ void GameLogic::init(){
 	this->status->badgeLost = false;
 	this->tstatus = (TurnStatus*)malloc(sizeof(TurnStatus));
 	this->conn->playSound(3);
-	this->powerOffAllLight();
 	say("游戏开始");
 }
 void GameLogic::loop(){
@@ -54,7 +53,7 @@ void GameLogic::loop(){
 	this->tstatus->lycanKillId = 0;
 	this->tstatus->witchPosionId = 0;
 	this->tstatus->witchSaved = false;
-	//this->sheirffCampagin();
+	this->sheirffCampagin();
 	this->powerOffAllLight();
 	this->conn->playSound(4);
 	say("天黑请闭眼");
@@ -70,7 +69,7 @@ void GameLogic::loop(){
 
 void GameLogic::say(String data){
 	this->conn->outputString(data);
-	unsigned long time = data.length() * SPEECH_SPEED * 0.8f + 1200;
+	unsigned long time = data.length() * SPEECH_SPEED * 0.8f + 800;
 	delay(time);
 }
 
@@ -347,7 +346,6 @@ void GameLogic::sheirffCampagin(){
 	this->powerOffAllLight();
 	this->conn->playSound(33);
 	say("现在开始警长竞选，请在3秒内按确认键参与竞选");
-	delay(5000);
 	uint16_t candidate = 0;
 	uint8_t btn,id;
 	Timer timer(3000,this->conn);
@@ -362,7 +360,6 @@ void GameLogic::sheirffCampagin(){
 
 	this->conn->playSound(61);
 	say("现在开始竞选发言，请按确认键结束发言，取消键退出竞选");
-	delay(9000);
 	unsigned long current;
 	for(int i = 1; i<=PLAYER_NUMBER;i++){
 		if((candidate & this->clientIdToBinary(i)) == 0) continue;
@@ -391,11 +388,7 @@ void GameLogic::sheirffCampagin(){
 		}
 		this->conn->outputLight(0, candidate);
 	}
-	this->conn->playSound(65);
-	say("发言完毕");
 
-	this->conn->playSound(64);
-	say("请新警长按任意键确认");
 	this->status->sheriffId =  this->confirmOneIdentity(true);
 
 	// new sheriff shows
@@ -785,7 +778,7 @@ void GameLogic::checkClient(){
 			g |= l1;
 			r |= l2;
 			this->conn->outputLight(g,r);
-			delay(100);
+			delay(40);
 			g &= ~l1;
 			r &= ~l2;
 		}
@@ -804,7 +797,7 @@ void GameLogic::checkClient(){
 			g |= l1;
 			r |= l2;
 			this->conn->outputLight(g,r);
-			delay(100);
+			delay(40);
 			g &= ~l1;
 			r &= ~l2;
 
