@@ -28,6 +28,8 @@ void GameLogic::init(){
 	say(String("欢迎使用狼人杀电子法官"));
 	delay(S_TIME);
 	this->powerOnAllLight();
+
+	// Instruction
 	this->conn->playSound(67);
 	uint8_t id,btn;
 	uint16_t r = 0;
