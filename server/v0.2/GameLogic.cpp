@@ -25,9 +25,10 @@ void GameLogic::init(){
 	say("正在检测手柄状态");
 	this->checkClient();
 	this->conn->playSound(2);
+	this->powerOffAllLight();
 	say(String("欢迎使用狼人杀电子法官"));
 	delay(S_TIME);
-	this->powerOnAllLight();
+
 
 	// Instruction
 	this->conn->playSound(67);
@@ -37,16 +38,18 @@ void GameLogic::init(){
 	uint16_t skip = 0;
 	this->conn->clearBuffer();
 	unsigned long start = millis();
-	while(count > 0 || millis() - start < 49000){
+	while(count > 0 && (millis() - start) < 49000){
 		if(this->conn->input(id,btn) && (skip & this->clientIdToBinary(id)) == 0){
 			skip |= this->clientIdToBinary(id);
 			r |= this->clientIdToBinary(id);
-			this->conn->outputLight(r,0);
+			this->conn->outputLight(0,r);
 			count--;
 		}
 	}
 	this->powerOffAllLight();
-	delay(S_TIME);
+	this->conn->playSound(3);
+	say("游戏开始");
+
 
 
 	this->status = (GameStatus*)malloc(sizeof(GameStatus));
@@ -64,9 +67,8 @@ void GameLogic::init(){
 	this->status->usedCure = false;
 	this->status->badgeLost = false;
 	this->tstatus = (TurnStatus*)malloc(sizeof(TurnStatus));
-	this->conn->playSound(3);
-	this->powerOffAllLight();
-	say("游戏开始");
+
+
 
 }
 void GameLogic::loop(){
