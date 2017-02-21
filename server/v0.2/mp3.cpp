@@ -1,6 +1,6 @@
 #include "mp3.h"
 
-SoftwareSerial mySerial(9,10);
+SoftwareSerial *mp3Serial;
 
 
 void sendCommand(int8_t command, int16_t dat){
@@ -16,11 +16,12 @@ void sendCommand(int8_t command, int16_t dat){
 	Send_buf[7] = 0xef; //ending byte
 	for(uint8_t i=0; i<8; i++)//
 	{
-		mySerial.write(Send_buf[i]);
+		mp3Serial->write(Send_buf[i]);
 	}
 }
 void mp3_init(){
-  mySerial.begin(9600);
+  mp3Serial = new SoftwareSerial(9,10);
+  mp3Serial->begin(9600);
   delay(500);//Wait chip initialization is complete
   sendCommand(CMD_SEL_DEV, DEV_TF);//select the TF card
   delay(200);//wait for 200ms

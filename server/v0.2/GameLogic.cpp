@@ -28,6 +28,24 @@ void GameLogic::init(){
 	say(String("欢迎使用狼人杀电子法官"));
 	delay(S_TIME);
 	this->powerOnAllLight();
+	this->conn->playSound(67);
+	uint8_t id,btn;
+	uint16_t r = 0;
+	uint8_t count = PLAYER_NUMBER;
+	uint16_t skip = 0;
+	this->conn->clearBuffer();
+	unsigned long start = millis();
+	while(count > 0 || millis() - start < 30000){
+		if(this->conn->input(id,btn) && (skip & this->clientIdToBinary(id)) == 0){
+			skip |= this->clientIdToBinary(id);
+			r |= this->clientIdToBinary(id);
+			this->conn->outputLight(r,0);
+			count--;
+		}
+	}
+	this->powerOffAllLight();
+	delay(S_TIME);
+
 
 	this->status = (GameStatus*)malloc(sizeof(GameStatus));
 	this->status->hunterId = 0;
@@ -376,7 +394,7 @@ void GameLogic::sheirffCampagin(){
 			this->conn->playSound(56);
 			say("发言");
 			lightup = true;
-			Timer timer(SELECT_TIME,this->conn);
+			Timer timer(120000,this->conn);
 			this->conn->clearBuffer();
 			while(timer.run()){
 				if(this->conn->input(id,btn) && (candidate & this->clientIdToBinary(id)) > 0){
@@ -494,7 +512,7 @@ void GameLogic::startSpeech(){
 	uint8_t id,btn;
 	bool fromLeft = false;
 	Pid startId = 0;
-
+	this->conn->outputLight(this->status->playerAlive, 0);
 	if(!this->status->badgeLost && this->isPlayerAlive(this->status->sheriffId)){
 		this->conn->playSound(57);
 		startId = this->status->sheriffId;
@@ -556,8 +574,10 @@ void GameLogic::startSpeech(){
 }
 
 void GameLogic::voteForSuspect(){
+	this->conn->outputLight(this->status->playerAlive, 0);
 	this->conn->playSound(51);
 	say("现在开始投票");
+
 	this->tstatus->suspectId =  this->confirmOneIdentity(false);
 	this->conn->playSound(34 + this->tstatus->suspectId);
 	say(String(this->tstatus->suspectId) + "号玩家");
@@ -896,8 +916,12 @@ void GameLogic::showIdentity(){
 	for(int i = 0;i<PLAYER_NUMBER;i++){
 		if(this->status->playerRole[i] == R_LYCAN)
 			red |= this->clientIdToBinary(i+1);
-		else
+		else if(this->status->playerRole[i] == R_CITIZEN)
 			green |= this->clientIdToBinary(i+1);
+		else{
+			red |= this->clientIdToBinary(i+1);
+			green |= this->clientIdToBinary(i+1);
+		}
 	}
 	this->conn->outputLight(green,red);
 }

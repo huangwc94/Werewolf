@@ -4,6 +4,7 @@ ComputerDriver::ComputerDriver(){
 	Serial.begin(115200);
 	buffer = String("");
 	delay(50);
+	mp3_init();
 }
 
 void ComputerDriver::outputString(String data){
@@ -49,6 +50,7 @@ HardwareDriver::HardwareDriver(uint8_t playerNumber){
 	this->r = 0;
 	this->playerNumber = playerNumber;
 	this->currentSlaveId = 1;
+	mp3_init();
 }
 
 void HardwareDriver::outputString(String data){
