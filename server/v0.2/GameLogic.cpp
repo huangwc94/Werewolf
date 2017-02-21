@@ -352,6 +352,7 @@ void GameLogic::sheirffCampagin(){
 	uint16_t candidate = 0;
 	uint8_t btn,id;
 	Timer timer(3000,this->conn);
+	this->conn->clearBuffer();
 	while(timer.run()){
 		if(this->conn->input(id,btn) && this->isPlayerAlive(id)){
 			if(btn == 3 || btn == 5){
@@ -376,6 +377,7 @@ void GameLogic::sheirffCampagin(){
 			say("发言");
 			lightup = true;
 			Timer timer(SELECT_TIME,this->conn);
+			this->conn->clearBuffer();
 			while(timer.run()){
 				if(this->conn->input(id,btn) && (candidate & this->clientIdToBinary(id)) > 0){
 					if(id == i && (btn == 5 || btn == 3)){
@@ -421,6 +423,7 @@ void GameLogic::sheirffCampagin(){
 		else
 			this->conn->outputLight(0, candidate);
 		say("请新警长按任意键确认");
+		this->conn->clearBuffer();
 		while(1){
 			if(this->conn->input(id,btn)){
 				if(candidate == 0 || (candidate & this->clientIdToBinary(id)) > 0){
@@ -496,6 +499,7 @@ void GameLogic::startSpeech(){
 		this->conn->playSound(57);
 		startId = this->status->sheriffId;
 		say("请警长选择从左或从右开始发言");
+		this->conn->clearBuffer();
 		while(1){
 			if(this->conn->input(id,btn) && id == this->status->sheriffId){
 				if(btn == 1){
@@ -524,6 +528,7 @@ void GameLogic::startSpeech(){
 		say("发言");
 		lightup = true;
 		Timer timer(120000,this->conn);
+		this->conn->clearBuffer();
 		while(timer.run()){
 			if(this->conn->input(id,btn) && id == currentSpeechPlayer && (btn == 5 || btn == 3)){
 				break;
@@ -568,6 +573,7 @@ void GameLogic::voteForSuspect(){
 	unsigned long current = millis();
 	Timer timer(120000,this->conn);
 	uint8_t id,btn;
+	this->conn->clearBuffer();
 	while(timer.run()){
 		if(this->conn->input(id,btn) && id == this->tstatus->suspectId && (btn == 5 || btn == 3)){
 			break;
