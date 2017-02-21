@@ -1,3 +1,5 @@
+#include <SoftwareSerial.h>
+#include "Arduino.h"
 ////////////////////////////MP3 MODULE COMMEND//////////////////////////////////////////
 #define NEXT_SONG 0X01
 #define PREV_SONG 0X02
@@ -30,3 +32,6 @@
 
 #define SET_DAC 0X17//data is needed 00 start DAC OUTPUT;01 DAC no output
 ////////////////////////////////////////////////////////////////////////////////////
+void sendCommand(int8_t command, int16_t dat);
+void mp3_init();
+void play_sound(int id);

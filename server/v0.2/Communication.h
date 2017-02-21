@@ -2,7 +2,7 @@
 	#define Communication_h
 	#include <Wire.h>
 	#include <Arduino.h>
-	#include <SoftwareSerial.h>
+
 	#define STOP_CHAR '$'
 	#include "mp3.h"
 
@@ -33,10 +33,6 @@
 			bool input(uint8_t &id, uint8_t &btn);
 			void playSound(uint16_t id);
 			void clearBuffer();
-		private:
-			int8_t Send_buf[8] = {0};
-			SoftwareSerial *mySerial;
-			void sendCommand(int8_t command, int16_t dat);
 	};
 	class HardwareDriver:public Driver{
 		public:
@@ -49,9 +45,6 @@
 		private:
 			uint16_t g,r,playerNumber;
 			uint8_t currentSlaveId;
-			int8_t Send_buf[8] = {0};
-			SoftwareSerial *mySerial;
-			void sendCommand(int8_t command, int16_t dat);
 	};
 
 #endif
