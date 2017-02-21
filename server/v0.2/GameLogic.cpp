@@ -45,8 +45,9 @@ void GameLogic::init(){
 	this->status->badgeLost = false;
 	this->tstatus = (TurnStatus*)malloc(sizeof(TurnStatus));
 	this->conn->playSound(3);
-	say("游戏开始");
 	this->powerOffAllLight();
+	say("游戏开始");
+
 }
 void GameLogic::loop(){
 	// init turn status
@@ -219,9 +220,10 @@ void GameLogic::witchTurn(){
 		this->conn->playSound(17);
 		say("你要使用解药吗");
 
-		bool ableToUseCure = (!this->status->usedCure) && this->tstatus->lycanKillId == this->status->witchId && this->status->isFirstLoop;
-
-		ableToUseCure = ableToUseCure || (!this->status->usedCure && this->tstatus->lycanKillId > 0);
+		bool ableToUseCure = true;
+		if(!this->status->isFirstLoop){
+			ableToUseCure = !this->status->usedCure && this->tstatus->lycanKillId > 0 && this->tstatus->lycanKillId != this->status->witchId;
+		}
 
 		if(ableToUseCure){
 			bool result = this->confirmWithRole(R_WITCH,0,this->tstatus->lycanKillId);
