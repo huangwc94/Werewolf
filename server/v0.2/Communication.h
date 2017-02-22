@@ -21,9 +21,9 @@
 			virtual void clearBuffer() = 0;
 
 			virtual void playSound(uint16_t id) = 0;
-			
+
 			virtual void setScreen(uint8_t num) = 0;
-			
+
 			virtual void outputCentralLight(bool g,bool r) = 0;
 		protected:
 			String buffer;
@@ -39,6 +39,8 @@
 			void clearBuffer();
 			void setScreen(uint8_t num);
 			void outputCentralLight(bool g, bool r);
+		private:
+			uint8_t current_time;
 	};
 	class HardwareDriver:public Driver{
 		public:

@@ -5,6 +5,7 @@ ComputerDriver::ComputerDriver(){
 	buffer = String("");
 	delay(50);
 	mp3_init();
+	current_time = 222;
 }
 
 void ComputerDriver::outputString(String data){
@@ -43,10 +44,17 @@ void ComputerDriver::playSound(uint16_t id){
 }
 
 void ComputerDriver::setScreen(uint8_t num){
+	if(current_time == num){
+		return;
+	}
+	current_time = num;
 	if(num>99){
 		Serial.println("SCREEN:--");
 	}else{
-		Serial.println("SCREEN:"+num);
+		if(num < 10)
+			Serial.println(String("SCREEN:0")+num);
+		else
+			Serial.println(String("SCREEN:")+num);
 	}
 }
 
@@ -125,8 +133,8 @@ void HardwareDriver::playSound(uint16_t id){
 }
 
 void HardwareDriver::setScreen(uint8_t num){
-	
+
 }
 void HardwareDriver::outputCentralLight(bool g, bool r){
-	
+
 }

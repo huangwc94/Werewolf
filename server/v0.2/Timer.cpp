@@ -13,7 +13,7 @@ Timer::Timer(unsigned long timeout,Driver * conn){
   this->thy = true;
 }
 Timer::~Timer(){
-
+  this->conn->setScreen(101);
 }
 
 bool Timer::run(){
@@ -23,7 +23,7 @@ bool Timer::run(){
     return true;
   }
   long remaining = timeout + start - current;
-  
+
   if(remaining <= 1000 && one){
     this->conn->playSound(60);
     one = false;
@@ -44,6 +44,6 @@ bool Timer::run(){
     this->conn->playSound(66);
   }
   current = millis();
-  this->conn->setScreen(remaining/1000);
+  this->conn->setScreen(remaining/1000 + 1);
   return remaining >= 0;
 }

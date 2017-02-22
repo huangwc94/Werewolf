@@ -297,24 +297,29 @@
             update_lights("green", e.toString().split(":")[1]);
         } else if (e.startsWith("RLIGHT")) {
             update_lights("red", e.toString().split(":")[1]);
+
         } else if (e.startsWith("CLIGHT")){
             var status = e.toString().split(":")[1].split(",");
-
-            if(status[0] == "1"){
+            console.log(status);
+            if(status[0] == 1){
                 $("#c-light .green").addClass("label-success");
             }else{
                 $("#c-light .green").removeClass("label-success");
             }
-            if(status[1] == "1"){
+
+            if(status[1] == 1){
                 $("#c-light .red").addClass("label-danger");
+                console.log("open red light");
             }else{
+                console.log("close red light");
                 $("#c-light .red").removeClass("label-danger");
             }
 
         } else if(e.startsWith("SCREEN")){
             var text = e.toString().split(":")[1];
-            $("#screen1").text = text[0];
-            $("#screen2").text = text[1];
+            console.log("VALUE=" + text);
+            $("#screen1").text(text[0]);
+            $("#screen2").text(text[1]);
 
         } else {
             $("#backlog").append("<h3>" + e +"</h3>");

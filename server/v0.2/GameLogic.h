@@ -22,7 +22,7 @@
 #define M_TIME 4000
 #define L_TIME 6000
 #define XL_TIME 10000
-#define SELECT_TIME 30000
+#define SELECT_TIME 60000
 #define SPEECH_SPEED 100
 
 /**
