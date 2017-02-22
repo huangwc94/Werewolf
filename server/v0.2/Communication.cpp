@@ -42,6 +42,19 @@ void ComputerDriver::playSound(uint16_t id){
 	play_sound(id);
 }
 
+void ComputerDriver::setScreen(uint8_t num){
+	if(num>99){
+		Serial.println("SCREEN:--");
+	}else{
+		Serial.println("SCREEN:"+num);
+	}
+}
+
+void ComputerDriver::outputCentralLight(bool g, bool r){
+	Serial.println(String("CLIGHT:")+g+","+r);
+}
+
+
 HardwareDriver::HardwareDriver(uint8_t playerNumber){
 	Serial.begin(115200);
 	Wire.begin();
@@ -109,4 +122,11 @@ void HardwareDriver::playSound(uint16_t id){
 	Serial.println(String("PLAY:")+ id);
 	#endif
 	play_sound(id);
+}
+
+void HardwareDriver::setScreen(uint8_t num){
+	
+}
+void HardwareDriver::outputCentralLight(bool g, bool r){
+	
 }

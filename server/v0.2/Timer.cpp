@@ -19,10 +19,11 @@ Timer::~Timer(){
 bool Timer::run(){
 
   if(timeout == 0){
+    this->conn->setScreen(100);
     return true;
   }
   long remaining = timeout + start - current;
-
+  
   if(remaining <= 1000 && one){
     this->conn->playSound(60);
     one = false;
@@ -43,5 +44,6 @@ bool Timer::run(){
     this->conn->playSound(66);
   }
   current = millis();
+  this->conn->setScreen(remaining/1000);
   return remaining >= 0;
 }

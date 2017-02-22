@@ -300,10 +300,14 @@ void GameLogic::seerTurn(){
 		uint16_t l = this->clientIdToBinary(id);
 		this->conn->playSound(23);
 		say("该玩家为");
-		if(this->status->playerRole[id-1] == R_LYCAN)
-			this->conn->outputLight(0,l);
-		else
-			this->conn->outputLight(l,0);
+		if(this->status->playerRole[id-1] == R_LYCAN){
+			//this->conn->outputLight(0,l);
+			this->conn->outputCentralLight(false,true);
+		}else{
+			//this->conn->outputLight(l,0);
+			this->conn->outputCentralLight(true,false);
+		}
+			
 		delay(S_TIME);
 		this->powerOffAllLight();
 
@@ -763,16 +767,19 @@ bool GameLogic::confirmWithId(Pid allow, unsigned long timeout,Pid lightsOn){
 
 	uint16_t l = this->clientIdToBinary(lightsOn);
 	this->conn->outputLight(l,l);
+	this->conn->outputCentralLight(true,true);
 	this->conn->clearBuffer();
 	Timer timer(timeout,this->conn);
 	while(timer.run()){
 		if(this->conn->input(id,btn) && this->isPlayerAlive(id) && id == allow){
 			if(btn == 3 || btn == 5){
 				this->conn->outputLight(l,0);
+				this->conn->outputCentralLight(true,false);
 				delay(S_TIME);
 				return true;
 			}else if(btn == 4){
 				this->conn->outputLight(0,l);
+				this->conn->outputCentralLight(false,true);
 				delay(S_TIME);
 				return false;
 			}
@@ -788,16 +795,19 @@ bool GameLogic::confirmWithRole(role_t allow, unsigned long timeout,Pid lightsOn
 	this->conn->clearBuffer();
 	uint16_t l = this->clientIdToBinary(lightsOn);
 	this->conn->outputLight(l,l);
+	this->conn->outputCentralLight(true,true);
 	Timer timer(timeout,this->conn);
 	while(timer.run()){
 		if(this->conn->input(id,btn) && this->isPlayerAlive(id) && (this->status->playerRole[id - 1] == allow || allow == R_ALL)){
 			if(btn == 3 || btn == 5){
 				this->conn->outputLight(l,0);
+				this->conn->outputCentralLight(true,false);
 				delay(S_TIME);
 				this->powerOffAllLight();
 				return true;
 			}else if(btn == 4){
 				this->conn->outputLight(0,l);
+				this->conn->outputCentralLight(false,true);
 				delay(S_TIME);
 				this->powerOffAllLight();
 				return false;
@@ -906,10 +916,12 @@ Pid GameLogic::selectOneWithAllowId(unsigned long timeout,Pid allow,bool usingGr
 // light control
 void GameLogic::powerOffAllLight(){
 	this->conn->outputLight(0,0);
+	this->conn->outputCentralLight(false,false);
 }
 
 void GameLogic::powerOnAllLight(){
 	this->conn->outputLight(~0,~0);
+	this->conn->outputCentralLight(true,true);
 }
 
 void GameLogic::showIdentity(){

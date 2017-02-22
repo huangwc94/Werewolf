@@ -21,6 +21,10 @@
 			virtual void clearBuffer() = 0;
 
 			virtual void playSound(uint16_t id) = 0;
+			
+			virtual void setScreen(uint8_t num) = 0;
+			
+			virtual void outputCentralLight(bool g,bool r) = 0;
 		protected:
 			String buffer;
 	};
@@ -33,6 +37,8 @@
 			bool input(uint8_t &id, uint8_t &btn);
 			void playSound(uint16_t id);
 			void clearBuffer();
+			void setScreen(uint8_t num);
+			void outputCentralLight(bool g, bool r);
 	};
 	class HardwareDriver:public Driver{
 		public:
@@ -42,6 +48,8 @@
 			bool input(uint8_t &id, uint8_t &btn);
 			void clearBuffer();
 			void playSound(uint16_t id);
+			void setScreen(uint8_t num);
+			void outputCentralLight(bool g, bool r);
 		private:
 			uint16_t g,r,playerNumber;
 			uint8_t currentSlaveId;
