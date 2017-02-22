@@ -18,13 +18,16 @@
 <style type="text/css">
     #message {
         margin-top:100px;
-        height: 200px;
+        height: 100px;
         overflow: auto;
         overflow-scrolling: auto;
         color: darkred;
     }
     body{
         background-color: #fff;
+    }
+    .screen{
+        font-size: 30px;
     }
     #log {
         text-align: center;
@@ -37,6 +40,10 @@
     }
     .light{
         font-size: 40px;
+        text-align: center;
+    }
+    #c-light{
+         font-size: 50px;
         text-align: center;
     }
     #backlog{
@@ -165,6 +172,14 @@
             <div id="message">
 
             </div>
+            <div>
+                <span class="label label-warning screen"  id="screen1">1</span><span class="label label-warning screen" id="screen2">1</span>
+            </div>
+            <div id="c-light">
+                <span class="green label label-success">   </span>
+                <span class="red label label-danger">   </span>
+            </div>
+
         </div>
         <div class="client col-md-2" data="7">
             <img style="width: 100%" src="res/hunter.png">
@@ -284,15 +299,32 @@
             update_lights("green", e.toString().split(":")[1]);
         } else if (e.startsWith("RLIGHT")) {
             update_lights("red", e.toString().split(":")[1]);
+        } else if (e.startsWith("CLIGHT")){
+            var status = e.toString().split(":")[1].split(",");
+
+            if(status[0] == "1"){
+                $("#c-light .green").addClass("label-success");
+            }else{
+                $("#c-light .green").removeClass("label-success");
+            }
+            if(status[1] == "1"){
+                $("#c-light .red").addClass("label-danger");
+            }else{
+                $("#c-light .red").removeClass("label-danger");
+            }
+
+        } else if(e.startsWith("SCREEN")){
+            var text = e.toString().split(":")[1];
+            $("#screen1").text = text[0];
+            $("#screen2").text = text[1];
+
         } else {
             $("#backlog").append("<h3>" + e +"</h3>");
             if(!e.startsWith("Debug:")){
                 $("#message").html("<h1>" + e + "</h1>");
                 //responsiveVoice.speak(e, "Chinese Female");
             }
-            if(e.startsWith("天黑请闭眼")){
-                //playerMusic("");
-            }
+            
 
 
         }
