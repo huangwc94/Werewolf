@@ -214,16 +214,6 @@ void GameLogic::lycanTurn(){
 		say("狼人请按任意键确认");
 		this->roleChangeMore(R_CITIZEN,R_LYCAN,LYCAN_NUMBER);
 	}
-	say("狼人请自爆");
-	uint8_t id,btn;
-	LycanSusideIndicator lsi(this);
-	while(1){
-		if(this->conn->input(id,btn)){
-			if(lsi.detect(id, btn)){
-				say("Boom shaka laka!");
-			}
-		}
-	}
 	delay(S_TIME);
 	this->conn->playSound(12);
 	say("狼人请刀人");
@@ -392,7 +382,7 @@ void GameLogic::sheirffCampagin(){
 	uint16_t candidate = 0;
 	uint8_t btn,id;
 	uint8_t counter = 0;
-	Timer timer(5000,this->conn);
+	Timer timer(3000,this->conn);
 	this->conn->clearBuffer();
 	unsigned long start = millis();
 	while(millis() - start < 5000){
@@ -443,6 +433,7 @@ void GameLogic::sheirffCampagin(){
 				if(this->conn->input(id,btn)){
 
 					if((btn==1 || btn == 2) && lsi.detect(id, btn)){
+						this->status->badgeLost = true;
 						return;
 					}
 
@@ -560,7 +551,7 @@ void GameLogic::hunterSkill(){
 	say("请选择带走玩家");
 	Pid die = this->selectOneWithAllowId(0,this->status->hunterId,false);
 
-	if(this->status->isFirstLoop){
+	if(this->status->isFirstLoop && this->tstatus->lycanSusideId==0){
 		this->playerSpeech(die);
 		this->powerOffAllLight();
 	}
@@ -568,6 +559,7 @@ void GameLogic::hunterSkill(){
 }
 
 void GameLogic::playerSpeech(Pid speecher){
+	if(this->tstatus->lycanSusideId != 0 ) return;
 	uint16_t light = this->clientIdToBinary(speecher);
 	this->conn->outputLight(this->status->playerAlive, light);
 	this->conn->playSound(34 + speecher);
@@ -579,10 +571,7 @@ void GameLogic::playerSpeech(Pid speecher){
 	uint8_t btn,id;
 	Timer timer(SPEECH_TIME,this->conn);
 	this->conn->clearBuffer();
-
 	LycanSusideIndicator lsi(this);
-
-
 	while(timer.run()){
 		if(this->conn->input(id,btn)){
 			if((btn==1 || btn == 2) && lsi.detect(id, btn)){
@@ -722,7 +711,7 @@ void GameLogic::onDay(){
 
 	this->reportVictim(dlist);
 
-	if(this->status->isFirstLoop){
+	if(this->status->isFirstLoop && this->tstatus->lycanSusideId == 0){
 		for(Pid i = 1;i<PLAYER_NUMBER && this->tstatus->lycanSusideId == 0;i++){
 			if((dlist & this->clientIdToBinary(i)) == 0) continue;
 			this->playerSpeech(i);

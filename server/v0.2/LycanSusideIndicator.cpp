@@ -21,7 +21,8 @@ bool LycanSusideIndicator::detect(uint8_t id,uint8_t btn){
   if(gl->status->playerRole[id - 1] != R_LYCAN) return false;
   if(!gl->isPlayerAlive(id)) return false;
   if(btn != 1 && btn != 2) return false;
-
+  if(gl->tstatus->lycanSusideId>0) return false;
+  
   int this_lycan_id = -1;
   for(int i = 0;i<LYCAN_NUMBER;i++){
     if(this->lycan_id[i] == id){
