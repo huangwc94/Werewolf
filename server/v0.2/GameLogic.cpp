@@ -391,6 +391,8 @@ void GameLogic::witchTurn(){
 		}
 
 		if(ableToUseCure){
+
+
 			bool result = this->confirmWithRole(R_WITCH,CONFIRM_TIME,this->tstatus->lycanKillId);
 			if(result){
 				this->status->usedCure = true;
@@ -406,8 +408,11 @@ void GameLogic::witchTurn(){
 		say("你要使用毒药吗");
 
 		if((!this->status->usedPosion) && (!this->tstatus->witchSaved)){
-			this->tstatus->witchPosionId = this->selectOneWithAllowRole(SELECT_TIME,R_WITCH,false);
-			this->status->usedPosion = this->tstatus->witchPosionId != 0;
+			bool result = this->confirmWithRole(R_WITCH,CONFIRM_TIME,0);
+			if(result){
+				this->tstatus->witchPosionId = this->selectOneWithAllowRole(SELECT_TIME,R_WITCH,false);
+				this->status->usedPosion = this->tstatus->witchPosionId != 0;
+			}
 		}else{
 			delay(L_TIME);
 		}

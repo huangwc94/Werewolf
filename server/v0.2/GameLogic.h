@@ -27,7 +27,7 @@
 #define SPEECH_SPEED 100
 #define SPEECH_TIME 90000
 #define CONFIRM_TIME 60000
-#define SUSIDE_TIME 500
+#define SUSIDE_TIME 700
 /**
 	Which output/intput we are using
 */
