@@ -358,7 +358,9 @@ void GameLogic::lycanTurn(){
 	uint8_t id,btn;
 	while(1){
 		if(this->conn->input(id,btn)){
-			lsi.detect(id, btn);
+			if(lsi.detect(id, btn)){
+				LycanSusideIndicator lsi(this);
+			}
 		}
 	}
 
