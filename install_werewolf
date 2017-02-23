@@ -1,0 +1,16 @@
+#!/bin/bash
+
+
+pip install --user platformio
+
+git clone https://github.com/huangwc94/Werewolf "$HOME/.werewolf"
+
+ln -s  "$HOME/.werewolf/updatewerewolf" "/usr/local/bin/update" 
+
+ln -s  "$HOME/.werewolf/updatewerewolf" "$HOME/Desktop/update" 
+
+chmod 755 "$HOME/.werewolf/updatewerewolf"
+chmod 755 "/usr/local/bin/update" 
+chmod 755 "$HOME/Desktop/update" 
+
+exit
