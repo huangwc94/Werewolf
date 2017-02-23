@@ -9,17 +9,22 @@ GameLogic::~GameLogic(){
 	free(this->status);
 }
 void GameLogic::init(){
-	#ifdef DRIVER_TYPE_COMPUTER
-	ComputerDriver *driver = new ComputerDriver();
-	conn = driver;
-	say("Debug:Using computer serial port!");
-	#endif
 
 	#ifdef DRIVER_TYPE_HARDWARE
 	HardwareDriver *driver = new HardwareDriver(PLAYER_NUMBER);
 	conn = driver;
 	say("Debug:Using HardwareDriver");
+
+	#else
+
+	ComputerDriver *driver = new ComputerDriver();
+	conn = driver;
+	say("Debug:Using computer serial port!");
+
 	#endif
+
+
+
 	delay(100);
 	this->powerOffAllLight();
 	this->conn->playSound(1);
