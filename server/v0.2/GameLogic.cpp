@@ -69,6 +69,8 @@ void GameLogic::init(){
 	this->status->usedCure = false;
 	this->status->badgeLost = false;
 	this->status->yesterdayDead = 0;
+	this->status->autoSeerSheirrf = false;
+	this->status->seerChecked = 0;
 	this->tstatus = (TurnStatus*)malloc(sizeof(TurnStatus));
 
 
@@ -87,10 +89,14 @@ void GameLogic::loop(){
 	say("天黑请闭眼");
 	delay(L_TIME);
 	this->onNight();
+
+	this->checkResult_before_day();
+
 	this->powerOffAllLight();
 	this->conn->playSound(5);
 	say("天亮请睁眼");
 	this->onDay();
+	this->checkResult_before_night();
 
 	this->status->isFirstLoop = false;
 }
@@ -100,23 +106,87 @@ void GameLogic::say(String data){
 	unsigned long time = data.length() * SPEECH_SPEED * 0.8f + 800;
 	delay(time);
 }
+void GameLogic::checkResult_before_day(){
 
-void GameLogic::checkResult(){
-  uint8_t werewolfRemain = 0;
-  uint8_t citizenRemain = 0;
-  uint8_t godRemain = 0;
+	uint8_t werewolfRemain = 0;
+	uint8_t citizenRemain = 0;
+	uint8_t godRemain = 0;
+	for(int i = 0;i<PLAYER_NUMBER;i++){
+		if(!this->isPlayerAlive(i+1))
+			continue;
 
-  for(int i = 0;i<PLAYER_NUMBER;i++){
-  	if(!this->isPlayerAlive(i+1))
-  		continue;
+		if(this->status->playerRole[i] == R_LYCAN)
+			werewolfRemain++;
+		else if(this->status->playerRole[i] == R_CITIZEN)
+			citizenRemain++;
+		else
+			godRemain++;
+	}
 
-  	if(this->status->playerRole[i] == R_LYCAN)
-  		werewolfRemain++;
-  	else if(this->status->playerRole[i] == R_CITIZEN)
-  		citizenRemain++;
-  	else
-  		godRemain++;
-  }
+	if(this->tstatus->lycanKillId>0){
+		if(this->status->playerRole[this->tstatus->lycanKillId] == R_LYCAN){
+			werewolfRemain--;
+		}else if(this->status->playerRole[this->tstatus->lycanKillId] == R_CITIZEN){
+			citizenRemain--;
+		}else{
+			godRemain--;
+		}
+	}
+	if(this->tstatus->witchPosionId > 0){
+		if(this->status->playerRole[this->tstatus->witchPosionId] == R_LYCAN){
+			werewolfRemain--;
+		}else if(this->status->playerRole[this->tstatus->witchPosionId] == R_CITIZEN){
+			citizenRemain--;
+		}else{
+			godRemain--;
+		}
+	}
+
+	this->old_check_result(werewolfRemain,citizenRemain,godRemain);
+	bool werewolfWin = false;
+	if(!this->status->badgeLost && this->status->playerRole[this->status->sheriffId] == R_LYCAN){
+		if(werewolfRemain >= (citizenRemain + godRemain)){
+			werewolfWin = true;
+		}
+
+	}else{
+		if(werewolfRemain == (citizenRemain + godRemain + 1)){
+			werewolfWin = true;
+		}
+	}
+
+	uint8_t werewolfCheckCounter = 0;
+	if(this->status->autoSeerSheirrf){
+		for(Pid i = 1 ;i < PLAYER_NUMBER;i++){
+			if((this->status->seerChecked & this->clientIdToBinary(i)) == 0) continue;
+			if(this->status->playerRole[i - 1] == R_LYCAN){
+				werewolfCheckCounter++;
+			}
+		}
+	}
+
+	bool goodManWin = werewolfCheckCounter == LYCAN_NUMBER;
+
+	if(werewolfWin){
+			this->conn->playSound(6);
+			this->say("游戏结束，获胜的一方是");
+			delay(M_TIME);
+			this->conn->playSound(9);
+			this->say("狼人阵营获胜！");
+			this->showIdentity();
+			while(1);
+	}
+	if(goodManWin){
+		this->conn->playSound(6);
+		this->say("游戏结束，获胜的一方是");
+		delay(M_TIME);
+		this->conn->playSound(8);
+		this->say("好人阵营获胜！");
+		this->showIdentity();
+		while(1);
+	}
+}
+void GameLogic::old_check_result(uint8_t werewolfRemain,uint8_t citizenRemain,uint8_t godRemain){
 
   if(werewolfRemain==0 && (citizenRemain==0 || godRemain==0)){
 		this->conn->playSound(6);
@@ -147,8 +217,70 @@ void GameLogic::checkResult(){
   	this->showIdentity();
   	while(1);
   }
-  //Serial.println(String("Game is not over! ") + werewolfRemain + " werewolves remain. " + citizenRemain + " citizens remain. " + godRemain + " god remain.");
+}
+void GameLogic::checkResult_before_night(){
 
+	uint8_t werewolfRemain = 0;
+  uint8_t citizenRemain = 0;
+  uint8_t godRemain = 0;
+
+  for(int i = 0;i<PLAYER_NUMBER;i++){
+  	if(!this->isPlayerAlive(i+1))
+  		continue;
+
+  	if(this->status->playerRole[i] == R_LYCAN)
+  		werewolfRemain++;
+  	else if(this->status->playerRole[i] == R_CITIZEN)
+  		citizenRemain++;
+  	else
+  		godRemain++;
+  }
+
+	this->old_check_result(werewolfRemain,citizenRemain,godRemain);
+
+	if(this->isPlayerAlive(this->status->moronId))
+		godRemain--;
+
+	uint8_t goodManRemain = godRemain + citizenRemain;
+	bool werewolfWin = false;
+
+
+	//狼警长，狼人与好人一样多
+	werewolfWin = werewolfWin || (!this->status->badgeLost
+									&& (this->status->playerRole[this->status->sheriffId - 1] == R_LYCAN)
+									&& this->isPlayerAlive(this->status->sheriffId)
+									&& (werewolfRemain >= goodManRemain));
+	// 狼警长，狼人 = 好人 - 1 ，并且女巫双药全无，并且无猎人
+  werewolfWin = werewolfWin || (!this->status->badgeLost
+									&& (this->status->playerRole[this->status->sheriffId - 1] == R_LYCAN)
+									&& (werewolfRemain == (goodManRemain - 1))
+									&& this->status->usedPosion && this->status->usedCure
+									&& (!this->isPlayerAlive(this->status->hunterId))
+	);
+
+	// 非狼警长, 狼人比好人多
+	werewolfWin = werewolfWin || (
+		(this->status->badgeLost || this->status->playerRole[this->status->sheriffId - 1] != R_LYCAN)
+		&& (werewolfRemain > goodManRemain)
+	);
+	// 非狼警长，狼人 = 好人  ，并且女巫双药全无，并且无猎人
+	werewolfWin = werewolfWin || (
+									(this->status->badgeLost || this->status->playerRole[this->status->sheriffId - 1] != R_LYCAN)
+									&& (werewolfRemain > (godRemain + citizenRemain))
+									&& (werewolfRemain == goodManRemain)
+									&& this->status->usedPosion && this->status->usedCure
+									&& (!this->isPlayerAlive(this->status->hunterId))
+	);
+
+	if(werewolfWin){
+			this->conn->playSound(6);
+			this->say("游戏结束，获胜的一方是");
+			delay(M_TIME);
+			this->conn->playSound(9);
+			this->say("狼人阵营获胜！");
+			this->showIdentity();
+			while(1);
+	}
 }
 
 Pid GameLogic::previousAlivePlayer(Pid select){
@@ -304,6 +436,7 @@ void GameLogic::seerTurn(){
 		uint16_t l = this->clientIdToBinary(id);
 		this->conn->playSound(23);
 		say("该玩家为");
+		this->status->seerChecked |= this->clientIdToBinary(id);
 		if(this->status->playerRole[id-1] == R_LYCAN){
 			this->conn->outputLight(0,l);
 
@@ -504,6 +637,8 @@ void GameLogic::sheirffCampagin(){
 				}
 			}
 		}
+	}else if(sheriff == this->status->seerId){
+		this->status->autoSeerSheirrf = true;
 	}
 
 
@@ -630,6 +765,7 @@ void GameLogic::startSpeech(){
 
 	do{
 		this->playerSpeech(currentSpeechPlayer);
+		if(this->tstatus->lycanSusideId > 0) return;
 		if(fromLeft){
 			currentSpeechPlayer = this->previousAlivePlayer(currentSpeechPlayer);
 
@@ -732,8 +868,6 @@ void GameLogic::onDay(){
 
 	if(this->tstatus->lycanSusideId > 0){
 		this->markPlayerDie(this->tstatus->lycanSusideId);
-		this->checkResult();
-		delay(S_TIME);
 		this->changeSheirff();
 		delay(S_TIME);
 		this->reportSuvivor();
@@ -741,14 +875,12 @@ void GameLogic::onDay(){
 		return;
 	}
 
-	this->checkResult();
+
 	this->changeSheirff();
 	this->startSpeech();
 
 	if(this->tstatus->lycanSusideId > 0){
 		this->markPlayerDie(this->tstatus->lycanSusideId);
-		this->checkResult();
-		delay(S_TIME);
 		this->changeSheirff();
 		delay(S_TIME);
 		this->reportSuvivor();
@@ -771,8 +903,6 @@ void GameLogic::onDay(){
 	}
 	this->markPlayerDie(this->tstatus->suspectId);
 	this->markPlayerDie(this->tstatus->lycanSusideId);
-	this->checkResult();
-	delay(S_TIME);
 	this->changeSheirff();
 	delay(S_TIME);
 	this->reportSuvivor();

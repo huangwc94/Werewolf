@@ -57,6 +57,8 @@ typedef struct{
 	bool usedPosion;
 	bool usedCure;
 	bool badgeLost;
+	bool autoSeerSheirrf;
+	uint16_t seerChecked;
 } GameStatus;
 
 typedef struct
@@ -95,7 +97,9 @@ class GameLogic
 
 
 		// game helper
-		void checkResult();
+		void checkResult_before_night();
+		void checkResult_before_day();
+		void old_check_result(uint8_t werewolfRemain,uint8_t citizenRemain,uint8_t godRemain);
 		Pid previousAlivePlayer(Pid select);
 		Pid nextAlivePlayer(Pid select);
 
