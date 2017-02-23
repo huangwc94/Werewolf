@@ -1049,25 +1049,22 @@ Pid GameLogic::selectOneWithAllowRole(unsigned long timeout,role_t allow,bool us
 		if(this->conn->input(id,btn)){
 			if((this->status->playerRole[id - 1] == allow || allow == R_ALL) && this->isPlayerAlive(id)){
 				if(btn == 3 || btn == 5){
-
+					if(usingGreenLight){
+						delay(S_TIME);
+						this->powerOffAllLight();
+						return select;
+					}
 					this->powerOffAllLight();
-					delay(XS_TIME);
-					if(usingGreenLight)
-						this->conn->outputLight(l,0);
-					else
-						this->conn->outputLight(0,l);
-
-					delay(XS_TIME);
+					delay(500);
+					this->conn->outputLight(0,l);
+					delay(500);
 					this->powerOffAllLight();
-					delay(XS_TIME);
-					if(usingGreenLight)
-						this->conn->outputLight(l,0);
-					else
-						this->conn->outputLight(0,l);
-
-					delay(XS_TIME);
+					delay(500);
+					this->conn->outputLight(0,l);
+					delay(500);
 					this->powerOffAllLight();
 					return select;
+
 				}else if(btn==1){
 					select = this->previousAlivePlayer(select);
 					l = this->clientIdToBinary(select);
@@ -1113,23 +1110,19 @@ Pid GameLogic::selectOneWithAllowId(unsigned long timeout,Pid allow,bool usingGr
 		if(this->conn->input(id,btn)){
 			if(id == allow){
 				if(btn == 3 || btn == 5){
-
+					if(usingGreenLight){
+						delay(S_TIME);
+						this->powerOffAllLight();
+						return select;
+					}
 					this->powerOffAllLight();
-					delay(XS_TIME);
-					if(usingGreenLight)
-						this->conn->outputLight(l,0);
-					else
-						this->conn->outputLight(0,l);
-
-					delay(XS_TIME);
+					delay(500);
+					this->conn->outputLight(0,l);
+					delay(500);
 					this->powerOffAllLight();
-					delay(XS_TIME);
-					if(usingGreenLight)
-						this->conn->outputLight(l,0);
-					else
-						this->conn->outputLight(0,l);
-
-					delay(XS_TIME);
+					delay(500);
+					this->conn->outputLight(0,l);
+					delay(500);
 					this->powerOffAllLight();
 					return select;
 				}else if(btn==1){
