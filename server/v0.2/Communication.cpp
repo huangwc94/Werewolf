@@ -58,9 +58,6 @@ void ComputerDriver::setScreen(uint8_t num){
 	}
 }
 
-void ComputerDriver::outputCentralLight(bool g, bool r){
-	Serial.println(String("CLIGHT:")+g+","+r);
-}
 
 
 HardwareDriver::HardwareDriver(uint8_t playerNumber){
@@ -133,8 +130,5 @@ void HardwareDriver::playSound(uint16_t id){
 }
 
 void HardwareDriver::setScreen(uint8_t num){
-
-}
-void HardwareDriver::outputCentralLight(bool g, bool r){
 
 }

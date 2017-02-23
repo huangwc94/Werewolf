@@ -24,7 +24,6 @@
 
 			virtual void setScreen(uint8_t num) = 0;
 
-			virtual void outputCentralLight(bool g,bool r) = 0;
 		protected:
 			String buffer;
 	};
@@ -38,7 +37,6 @@
 			void playSound(uint16_t id);
 			void clearBuffer();
 			void setScreen(uint8_t num);
-			void outputCentralLight(bool g, bool r);
 		private:
 			uint8_t current_time;
 	};
@@ -51,7 +49,6 @@
 			void clearBuffer();
 			void playSound(uint16_t id);
 			void setScreen(uint8_t num);
-			void outputCentralLight(bool g, bool r);
 		private:
 			uint16_t g,r,playerNumber;
 			uint8_t currentSlaveId;

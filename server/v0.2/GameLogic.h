@@ -51,6 +51,7 @@ typedef struct{
 	Pid seerId;
 	Pid moronId;
 	Pid sheriffId;
+	Pid yesterdayDead;
 	bool isFirstLoop;
 	bool usedPosion;
 	bool usedCure;
