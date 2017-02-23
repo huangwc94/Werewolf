@@ -38,14 +38,14 @@ void GameLogic::init(){
 	uint16_t skip = 0;
 	this->conn->clearBuffer();
 	unsigned long start = millis();
-	while(count > 0 && (millis() - start) < 49000){
+	while(count > 0 && (millis() - start) < 52000){
 		if(this->conn->input(id,btn) && (skip & this->clientIdToBinary(id)) == 0){
 			skip |= this->clientIdToBinary(id);
 			r |= this->clientIdToBinary(id);
 			this->conn->outputLight(0,r);
 			count--;
 		}
-		this->conn->setScreen((start + 49000 -millis())/1000 + 1);
+		this->conn->setScreen((start + 52000 -millis())/1000 + 1);
 	}
 	this->conn->setScreen(100);
 	this->powerOffAllLight();
