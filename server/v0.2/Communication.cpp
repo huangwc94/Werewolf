@@ -73,6 +73,7 @@ HardwareDriver::HardwareDriver(uint8_t playerNumber){
 	this->display->setBrightness(0x0a);
 	xbtn = 0;
 	xid = 0;
+	last_same = 0;
 }
 
 void HardwareDriver::outputString(String data){
@@ -112,7 +113,14 @@ bool HardwareDriver::input(uint8_t &id, uint8_t &btn){
 			id = this->currentSlaveId;
 
 			if(id == xid && btn == xbtn){
-				return false;
+				if(millis() - last_same > 500){
+					last_same = millis();
+					xid = id;
+					xbtn = btn;
+					return true;
+				}else{
+					return false;
+				}
 			}else{
 				xid = id;
 				xbtn = btn;

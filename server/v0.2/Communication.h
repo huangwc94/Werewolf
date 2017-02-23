@@ -54,6 +54,7 @@
 		private:
 			TM1637Display *display;
 			uint8_t xbtn,xid;
+			unsigned long last_same;
 			uint16_t g,r,playerNumber;
 			uint8_t currentSlaveId;
 	};
