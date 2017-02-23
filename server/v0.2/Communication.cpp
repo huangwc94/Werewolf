@@ -113,7 +113,7 @@ bool HardwareDriver::input(uint8_t &id, uint8_t &btn){
 			id = this->currentSlaveId;
 
 			if(id == xid && btn == xbtn){
-				if(millis() - last_same > 200){
+				if(millis() - last_same > 300){
 					last_same = millis();
 					xid = id;
 					xbtn = btn;
