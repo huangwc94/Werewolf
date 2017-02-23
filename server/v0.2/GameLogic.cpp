@@ -45,7 +45,9 @@ void GameLogic::init(){
 			this->conn->outputLight(0,r);
 			count--;
 		}
+		this->conn->setScreen((start + 49000 -millis())/1000 + 1);
 	}
+	this->conn->setScreen(100);
 	this->powerOffAllLight();
 	this->conn->playSound(3);
 	say("游戏开始");
@@ -79,6 +81,7 @@ void GameLogic::loop(){
 	this->tstatus->witchSaved = false;
 
 	this->powerOffAllLight();
+
 	this->conn->playSound(4);
 	say("天黑请闭眼");
 	delay(L_TIME);
@@ -389,14 +392,28 @@ void GameLogic::sheirffCampagin(){
 			}
 		}
 	}
+	this->conn->setScreen(100);
+	if(candidate == 0){
+		this->status->badgeLost = true;
+		this->status->sheriffId = 0;
+		this->conn->playSound(68);
+		say("没有人参与竞选警长，从此以后没有警长。");
+		return;
+	}
+
 	Pid sheriff = 0;
 	if(counter > 1){
 		this->conn->playSound(61);
 		say("现在开始竞选发言，请按确认键结束发言，取消键退出竞选");
 		unsigned long current;
 		bool lightup = true;
-		for(int i = 1; i<=PLAYER_NUMBER && counter > 1;i++){
+		unsigned long random = millis();
+		random = random % 48;
+		for(uint16_t q = (int)random; q<=(PLAYER_NUMBER + random) && counter > 1; q++){
+			Pid i = (q % PLAYER_NUMBER) + 1;
+
 			if((candidate & this->clientIdToBinary(i)) == 0) continue;
+
 			uint16_t light = this->clientIdToBinary(i);
 			this->conn->outputLight(light, candidate);
 			this->conn->playSound(34 + i);
@@ -407,15 +424,21 @@ void GameLogic::sheirffCampagin(){
 			Timer timer(SPEECH_TIME,this->conn);
 			this->conn->clearBuffer();
 			while(timer.run()){
+
+				// button control
 				if(this->conn->input(id,btn) && (candidate & this->clientIdToBinary(id)) > 0){
 					if(id == i && (btn == 5 || btn == 3)){
 						break;
 					}
 					if(btn == 4){
 						candidate &= ~ this->clientIdToBinary(id);
+						if(lightup)
+							this->conn->outputLight(light, candidate);
+						else
+							this->conn->outputLight(0, candidate);
 						counter--;
 						if(counter < 2){
-								break;
+							break;
 						}
 						if(id == i){
 							break;
@@ -423,6 +446,7 @@ void GameLogic::sheirffCampagin(){
 					}
 				}
 
+				// blink
 				if(millis() - current >= 500){
 					current = millis();
 					if(lightup)
@@ -437,7 +461,7 @@ void GameLogic::sheirffCampagin(){
 		this->conn->playSound(65);
 		say("发言完毕");
 	}
-	
+
 	for(int i = 1;i<=PLAYER_NUMBER;i++){
 		if((candidate & this->clientIdToBinary(i)) > 0){
 			if(sheriff == 0){
@@ -448,14 +472,11 @@ void GameLogic::sheirffCampagin(){
 			}
 		}
 	}
-	
+
 
 	if(sheriff == 0){
 		this->conn->playSound(64);
-		if(candidate == 0)
-			this->conn->outputLight(0, this->status->playerAlive);
-		else
-			this->conn->outputLight(0, candidate);
+		this->conn->outputLight(0, candidate);
 		say("请新警长按任意键确认");
 		this->conn->clearBuffer();
 		while(1){
@@ -470,10 +491,10 @@ void GameLogic::sheirffCampagin(){
 			}
 		}
 	}
-	
+
 
 	this->status->sheriffId =  sheriff;
-	
+
 	this->powerOffAllLight();
 	// new sheriff shows
 	this->conn->playSound(34);
@@ -960,7 +981,7 @@ void GameLogic::checkClient(){
 	uint16_t r = 0;
 	uint16_t g = 0;
 	for(int i = 1;i<=PLAYER_NUMBER;i++){
-		
+
 		for(int j = i ; j <= PLAYER_NUMBER - i + 1;j++){
 			int q = PLAYER_NUMBER - j + 1;
 			this->conn->setScreen(i + j);

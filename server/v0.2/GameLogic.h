@@ -30,8 +30,8 @@
 	Which output/intput we are using
 */
 
-#define DRIVER_TYPE_COMPUTER
-//#define DRIVER_TYPE_HARDWARE
+//#define DRIVER_TYPE_COMPUTER
+#define DRIVER_TYPE_HARDWARE
 
 
 /**
