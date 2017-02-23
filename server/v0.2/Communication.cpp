@@ -5,7 +5,7 @@ ComputerDriver::ComputerDriver(){
 	buffer = String("");
 	delay(50);
 	mp3_init();
-	current_time = 222;
+	current_time = 10000;
 }
 
 void ComputerDriver::outputString(String data){
@@ -43,18 +43,18 @@ void ComputerDriver::playSound(uint16_t id){
 	play_sound(id);
 }
 
-void ComputerDriver::setScreen(uint8_t num){
+void ComputerDriver::setScreen(uint16_t num){
 	if(current_time == num){
 		return;
 	}
 	current_time = num;
-	if(num>99){
+	if(num>9999){
 		Serial.println("SCREEN:--");
 	}else{
 		if(num < 10)
 			Serial.println(String("SCREEN:0")+num);
 		else
-			Serial.println(String("SCREEN:")+num);
+			Serial.println(String("SCREEN:")+(num % 100));
 	}
 }
 
@@ -69,6 +69,8 @@ HardwareDriver::HardwareDriver(uint8_t playerNumber){
 	this->playerNumber = playerNumber;
 	this->currentSlaveId = 1;
 	mp3_init();
+	this->display = new TM1637Display(7,6);
+	this->display->setBrightness(0x0a);
 }
 
 void HardwareDriver::outputString(String data){
@@ -128,7 +130,22 @@ void HardwareDriver::playSound(uint16_t id){
 	#endif
 	play_sound(id);
 }
+const uint8_t SEG_NONE[] = {
+	SEG_G,
+	SEG_G,
+	SEG_G,
+	SEG_G
+};
+void HardwareDriver::setScreen(uint16_t num){
 
-void HardwareDriver::setScreen(uint8_t num){
 
+	if(num > 999){
+		this->display->setSegments((uint8_t *)SEG_NONE);
+	}else{
+		uint8_t data[] = { 0xff, 0xff, 0xff, SEG_A | SEG_C | SEG_D | SEG_F};
+		data[0] = this->display->encodeDigit(num / 100);
+		data[1] = this->display->encodeDigit((num - ((num / 100) * 100))/ 10);
+		data[2] = this->display->encodeDigit(num % 10);
+		display->setSegments(data);
+	}
 }

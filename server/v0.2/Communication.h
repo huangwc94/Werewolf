@@ -1,12 +1,14 @@
 #ifndef Communication_h
 	#define Communication_h
+
 	#include <Wire.h>
 	#include <Arduino.h>
-
+	#include <TM1637Display.h>
 	#define STOP_CHAR '$'
+
 	#include "mp3.h"
 
-	#define DEBUG
+	//#define DEBUG
 	class Driver{
 		public:
 
@@ -22,7 +24,7 @@
 
 			virtual void playSound(uint16_t id) = 0;
 
-			virtual void setScreen(uint8_t num) = 0;
+			virtual void setScreen(uint16_t num) = 0;
 
 		protected:
 			String buffer;
@@ -36,9 +38,9 @@
 			bool input(uint8_t &id, uint8_t &btn);
 			void playSound(uint16_t id);
 			void clearBuffer();
-			void setScreen(uint8_t num);
+			void setScreen(uint16_t num);
 		private:
-			uint8_t current_time;
+			uint16_t current_time;
 	};
 	class HardwareDriver:public Driver{
 		public:
@@ -48,8 +50,9 @@
 			bool input(uint8_t &id, uint8_t &btn);
 			void clearBuffer();
 			void playSound(uint16_t id);
-			void setScreen(uint8_t num);
+			void setScreen(uint16_t num);
 		private:
+			TM1637Display *display;
 			uint16_t g,r,playerNumber;
 			uint8_t currentSlaveId;
 	};

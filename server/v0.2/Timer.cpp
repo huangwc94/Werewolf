@@ -14,7 +14,7 @@ Timer::Timer(unsigned long timeout,Driver * conn){
   this->conn->setScreen(timeout / 1000);
 }
 Timer::~Timer(){
-  this->conn->setScreen(101);
+  this->conn->setScreen(10000);
 }
 
 bool Timer::run(){

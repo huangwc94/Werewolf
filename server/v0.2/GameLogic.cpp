@@ -47,7 +47,7 @@ void GameLogic::init(){
 		}
 		this->conn->setScreen((start + 52000 -millis())/1000 + 1);
 	}
-	this->conn->setScreen(100);
+	this->conn->setScreen(10000);
 	this->powerOffAllLight();
 	this->conn->playSound(3);
 	say("游戏开始");
@@ -528,7 +528,7 @@ void GameLogic::sheirffCampagin(){
 			}
 		}
 	}
-	this->conn->setScreen(100);
+	this->conn->setScreen(10000);
 	if(candidate == 0){
 		this->status->badgeLost = true;
 		this->status->sheriffId = 0;
@@ -1154,7 +1154,7 @@ void GameLogic::checkClient(){
 
 		for(int j = i ; j <= PLAYER_NUMBER - i + 1;j++){
 			int q = PLAYER_NUMBER - j + 1;
-			this->conn->setScreen(i + j);
+			this->conn->setScreen(i);
 			uint16_t l1 = this->clientIdToBinary(q);
 			uint16_t l2 = this->clientIdToBinary(j);
 			g |= l1;
