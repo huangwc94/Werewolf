@@ -71,6 +71,8 @@ HardwareDriver::HardwareDriver(uint8_t playerNumber){
 	mp3_init();
 	this->display = new TM1637Display(7,6);
 	this->display->setBrightness(0x0a);
+	xbtn = 0;
+	xid = 0;
 }
 
 void HardwareDriver::outputString(String data){
@@ -108,8 +110,16 @@ bool HardwareDriver::input(uint8_t &id, uint8_t &btn){
 		btn = Wire.read();
 		if(btn > 0){
 			id = this->currentSlaveId;
-			delay(500);
-			return true;
+
+			if(id == xid && btn == xbtn){
+				return false;
+			}else{
+				xid = id;
+				xbtn = btn;
+				return true;
+			}
+
+
 		}else{
 			this->currentSlaveId ++;
 			if(this->currentSlaveId > this->playerNumber){
@@ -142,7 +152,7 @@ void HardwareDriver::setScreen(uint16_t num){
 	if(num > 999){
 		this->display->setSegments((uint8_t *)SEG_NONE);
 	}else{
-		uint8_t data[] = { 0xff, 0xff, 0xff, SEG_A | SEG_C | SEG_D | SEG_F};
+		uint8_t data[] = { 0xff, 0xff, 0xff, SEG_A | SEG_C | SEG_D | SEG_F | SEG_G};
 		data[0] = this->display->encodeDigit(num / 100);
 		data[1] = this->display->encodeDigit((num - ((num / 100) * 100))/ 10);
 		data[2] = this->display->encodeDigit(num % 10);

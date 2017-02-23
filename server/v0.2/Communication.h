@@ -53,6 +53,7 @@
 			void setScreen(uint16_t num);
 		private:
 			TM1637Display *display;
+			uint8_t xbtn,xid;
 			uint16_t g,r,playerNumber;
 			uint8_t currentSlaveId;
 	};
