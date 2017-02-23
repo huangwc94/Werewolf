@@ -248,7 +248,7 @@ void GameLogic::witchTurn(){
 		}
 
 		if(ableToUseCure){
-			bool result = this->confirmWithRole(R_WITCH,0,this->tstatus->lycanKillId);
+			bool result = this->confirmWithRole(R_WITCH,CONFIRM_TIME,this->tstatus->lycanKillId);
 			if(result){
 				this->status->usedCure = true;
 				this->tstatus->lycanKillId = 0;
@@ -377,23 +377,25 @@ void GameLogic::sheirffCampagin(){
 	say("现在开始警长竞选，请在3秒内按确认键参与竞选");
 	uint16_t candidate = 0;
 	uint8_t btn,id;
+	uint8_t counter = 0;
 	Timer timer(3000,this->conn);
 	this->conn->clearBuffer();
 	while(timer.run()){
 		if(this->conn->input(id,btn) && this->isPlayerAlive(id)){
 			if(btn == 3 || btn == 5){
 				candidate |= this->clientIdToBinary(id);
+				counter ++;
 				this->conn->outputLight(0, candidate);
 			}
 		}
 	}
 	Pid sheriff = 0;
-	if(candidate != 0){
+	if(counter > 1){
 		this->conn->playSound(61);
 		say("现在开始竞选发言，请按确认键结束发言，取消键退出竞选");
 		unsigned long current;
 		bool lightup = true;
-		for(int i = 1; i<=PLAYER_NUMBER;i++){
+		for(int i = 1; i<=PLAYER_NUMBER && counter > 1;i++){
 			if((candidate & this->clientIdToBinary(i)) == 0) continue;
 			uint16_t light = this->clientIdToBinary(i);
 			this->conn->outputLight(light, candidate);
@@ -402,7 +404,7 @@ void GameLogic::sheirffCampagin(){
 			this->conn->playSound(56);
 			say("发言");
 			lightup = true;
-			Timer timer(SELECT_TIME * 2,this->conn);
+			Timer timer(SPEECH_TIME,this->conn);
 			this->conn->clearBuffer();
 			while(timer.run()){
 				if(this->conn->input(id,btn) && (candidate & this->clientIdToBinary(id)) > 0){
@@ -411,6 +413,10 @@ void GameLogic::sheirffCampagin(){
 					}
 					if(btn == 4){
 						candidate &= ~ this->clientIdToBinary(id);
+						counter--;
+						if(counter < 2){
+								break;
+						}
 						if(id == i){
 							break;
 						}
@@ -430,17 +436,19 @@ void GameLogic::sheirffCampagin(){
 		}
 		this->conn->playSound(65);
 		say("发言完毕");
-		for(int i = 1;i<=PLAYER_NUMBER;i++){
-			if((candidate & this->clientIdToBinary(i)) > 0){
-				if(sheriff == 0){
-					sheriff = i;
-				}else{
-					sheriff = 0;
-					break;
-				}
+	}
+	
+	for(int i = 1;i<=PLAYER_NUMBER;i++){
+		if((candidate & this->clientIdToBinary(i)) > 0){
+			if(sheriff == 0){
+				sheriff = i;
+			}else{
+				sheriff = 0;
+				break;
 			}
 		}
 	}
+	
 
 	if(sheriff == 0){
 		this->conn->playSound(64);
@@ -462,8 +470,10 @@ void GameLogic::sheirffCampagin(){
 			}
 		}
 	}
-	//
+	
+
 	this->status->sheriffId =  sheriff;
+	
 	this->powerOffAllLight();
 	// new sheriff shows
 	this->conn->playSound(34);
@@ -518,7 +528,7 @@ void GameLogic::startSpeech(){
 	this->conn->playSound(50);
 	say("现在开始轮流发言");
 	uint8_t id,btn;
-	bool fromLeft = false;
+	bool fromLeft = true;
 	Pid startId = 0;
 	this->conn->outputLight(this->status->playerAlive, 0);
 	if(!this->status->badgeLost && this->isPlayerAlive(this->status->sheriffId)){
@@ -553,7 +563,7 @@ void GameLogic::startSpeech(){
 		this->conn->playSound(56);
 		say("发言");
 		lightup = true;
-		Timer timer(SELECT_TIME * 2,this->conn);
+		Timer timer(SPEECH_TIME,this->conn);
 		this->conn->clearBuffer();
 		while(timer.run()){
 			if(this->conn->input(id,btn) && id == currentSpeechPlayer && (btn == 5 || btn == 3)){
@@ -599,7 +609,7 @@ void GameLogic::voteForSuspect(){
 	say("发言");
 	bool lightup = true;
 	unsigned long current = millis();
-	Timer timer(120000,this->conn);
+	Timer timer(SPEECH_TIME,this->conn);
 	uint8_t id,btn;
 	this->conn->clearBuffer();
 	while(timer.run()){
@@ -677,7 +687,7 @@ void GameLogic::onDay(){
 		this->conn->playSound(28);
 		say("你要使用技能吗");
 		this->markPlayerAlive(this->status->hunterId);
-		if(this->confirmWithRole(R_HUNTER,30000,this->status->hunterId))
+		if(this->confirmWithRole(R_HUNTER,CONFIRM_TIME,this->status->hunterId))
 			this->hunterSkill();
 		this->markPlayerDie(this->status->hunterId);
 	}
@@ -690,13 +700,13 @@ void GameLogic::onDay(){
 	if(this->tstatus->suspectId == this->status->hunterId){
 		this->conn->playSound(28);
 		say("你要使用技能吗");
-		if(this->confirmWithRole(R_HUNTER,30000,this->status->hunterId))
+		if(this->confirmWithRole(R_HUNTER,CONFIRM_TIME,this->status->hunterId))
 			this->hunterSkill();
 	}
 	if(this->tstatus->suspectId == this->status->moronId){
 		this->conn->playSound(28);
 		say("你要使用技能吗");
-		if(this->confirmWithRole(R_MORON,30000,this->status->moronId))
+		if(this->confirmWithRole(R_MORON,CONFIRM_TIME,this->status->moronId))
 			this->moronSkill();
 	}
 	this->markPlayerDie(this->tstatus->suspectId);
@@ -825,9 +835,9 @@ Pid GameLogic::selectOneWithAllowRole(unsigned long timeout,role_t allow,bool us
 	uint8_t id,btn;
 	uint16_t l = this->clientIdToBinary(select);
 	if(usingGreenLight)
-		this->conn->outputLight(l,0);
+		this->conn->outputLight(l,this->status->playerAlive);
 	else
-		this->conn->outputLight(0,l);
+		this->conn->outputLight(this->status->playerAlive,l);
 	this->conn->clearBuffer();
 
 	Timer timer(timeout,this->conn);
@@ -843,16 +853,16 @@ Pid GameLogic::selectOneWithAllowRole(unsigned long timeout,role_t allow,bool us
 					select = this->previousAlivePlayer(select);
 					l = this->clientIdToBinary(select);
 					if(usingGreenLight)
-						this->conn->outputLight(l,0);
+						this->conn->outputLight(l,this->status->playerAlive);
 					else
-						this->conn->outputLight(0,l);
+						this->conn->outputLight(this->status->playerAlive,l);
 				}else if(btn==2){
 					select = nextAlivePlayer(select);
 					l = this->clientIdToBinary(select);
 					if(usingGreenLight)
-						this->conn->outputLight(l,0);
+						this->conn->outputLight(l,this->status->playerAlive);
 					else
-						this->conn->outputLight(0,l);
+						this->conn->outputLight(this->status->playerAlive,l);
 				}else if(btn==4){
 					delay(XS_TIME);
 					this->powerOffAllLight();
@@ -874,9 +884,9 @@ Pid GameLogic::selectOneWithAllowId(unsigned long timeout,Pid allow,bool usingGr
 	this->conn->clearBuffer();
 	uint16_t l = this->clientIdToBinary(select);
 	if(usingGreenLight)
-		this->conn->outputLight(l,0);
+		this->conn->outputLight(l,this->status->playerAlive);
 	else
-		this->conn->outputLight(0,l);
+		this->conn->outputLight(this->status->playerAlive,l);
 
 	Timer timer(timeout,this->conn);
 
@@ -891,16 +901,16 @@ Pid GameLogic::selectOneWithAllowId(unsigned long timeout,Pid allow,bool usingGr
 					select = this->previousAlivePlayer(select);
 					l = this->clientIdToBinary(select);
 					if(usingGreenLight)
-						this->conn->outputLight(l,0);
+						this->conn->outputLight(l,this->status->playerAlive);
 					else
-						this->conn->outputLight(0,l);
+						this->conn->outputLight(this->status->playerAlive,l);
 				}else if(btn==2){
 					select = nextAlivePlayer(select);
 					l = this->clientIdToBinary(select);
 					if(usingGreenLight)
-						this->conn->outputLight(l,0);
+						this->conn->outputLight(l,this->status->playerAlive);
 					else
-						this->conn->outputLight(0,l);
+						this->conn->outputLight(this->status->playerAlive,l);
 				}else if(btn==4){
 					delay(XS_TIME);
 					this->powerOffAllLight();
@@ -950,9 +960,10 @@ void GameLogic::checkClient(){
 	uint16_t r = 0;
 	uint16_t g = 0;
 	for(int i = 1;i<=PLAYER_NUMBER;i++){
-		this->conn->setScreen(i);
+		
 		for(int j = i ; j <= PLAYER_NUMBER - i + 1;j++){
 			int q = PLAYER_NUMBER - j + 1;
+			this->conn->setScreen(i + j);
 			uint16_t l1 = this->clientIdToBinary(q);
 			uint16_t l2 = this->clientIdToBinary(j);
 			g |= l1;
@@ -973,6 +984,7 @@ void GameLogic::checkClient(){
 		this->conn->setScreen(PLAYER_NUMBER - i);
 		for(int j = i ; j <= PLAYER_NUMBER - i + 1;j++){
 			int q = PLAYER_NUMBER - j + 1;
+			this->conn->setScreen(i + j);
 			uint16_t l2 = this->clientIdToBinary(q);
 			uint16_t l1 = this->clientIdToBinary(j);
 			g |= l1;

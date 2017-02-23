@@ -24,7 +24,8 @@
 #define XL_TIME 10000
 #define SELECT_TIME 60000
 #define SPEECH_SPEED 100
-
+#define SPEECH_TIME 90000
+#define CONFIRM_TIME 60000
 /**
 	Which output/intput we are using
 */
