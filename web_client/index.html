@@ -341,6 +341,7 @@
     }
 
     function update_lights(color, data) {
+        console.log("updating light");
         var d = parseInt(data);
         var class_name = color == "green" ? "label-success" : "label-danger";
         for (var i = 0; i < 12; i++) {

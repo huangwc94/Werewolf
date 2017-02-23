@@ -1,4 +1,5 @@
 #include "GameLogic.h"
+#include "LycanSusideIndicator.h"
 
 GameLogic::GameLogic(){
 
@@ -28,7 +29,6 @@ void GameLogic::init(){
 	this->powerOffAllLight();
 	say(String("欢迎使用狼人杀电子法官"));
 	delay(S_TIME);
-
 
 	// Instruction
 	this->conn->playSound(67);
@@ -80,7 +80,7 @@ void GameLogic::loop(){
 	this->tstatus->lycanKillId = 0;
 	this->tstatus->witchPosionId = 0;
 	this->tstatus->witchSaved = false;
-
+	this->tstatus->lycanSusideId = 0;
 	this->powerOffAllLight();
 
 	this->conn->playSound(4);
@@ -214,6 +214,16 @@ void GameLogic::lycanTurn(){
 		say("狼人请按任意键确认");
 		this->roleChangeMore(R_CITIZEN,R_LYCAN,LYCAN_NUMBER);
 	}
+	say("狼人请自爆");
+	uint8_t id,btn;
+	LycanSusideIndicator lsi(this);
+	while(1){
+		if(this->conn->input(id,btn)){
+			if(lsi.detect(id, btn)){
+				say("Boom shaka laka!");
+			}
+		}
+	}
 	delay(S_TIME);
 	this->conn->playSound(12);
 	say("狼人请刀人");
@@ -306,10 +316,10 @@ void GameLogic::seerTurn(){
 		say("该玩家为");
 		if(this->status->playerRole[id-1] == R_LYCAN){
 			this->conn->outputLight(0,l);
-			
+
 		}else{
 			this->conn->outputLight(l,0);
-			
+
 		}
 
 		delay(S_TIME);
@@ -378,13 +388,15 @@ void GameLogic::moronTurn(){
 void GameLogic::sheirffCampagin(){
 	this->powerOffAllLight();
 	this->conn->playSound(33);
-	say("现在开始警长竞选，请在5秒内按确认键参与竞选");
+	say("现在开始警长竞选，请在3秒内按确认键参与竞选");
 	uint16_t candidate = 0;
 	uint8_t btn,id;
 	uint8_t counter = 0;
 	Timer timer(5000,this->conn);
 	this->conn->clearBuffer();
-	while(timer.run()){
+	unsigned long start = millis();
+	while(millis() - start < 5000){
+		timer.run();
 		if(this->conn->input(id,btn) && this->isPlayerAlive(id)){
 			if(btn == 3 || btn == 5){
 				candidate |= this->clientIdToBinary(id);
@@ -405,6 +417,7 @@ void GameLogic::sheirffCampagin(){
 	Pid sheriff = 0;
 	if(counter > 1){
 		this->conn->playSound(61);
+		LycanSusideIndicator lsi(this);
 		say("现在开始竞选发言，请按确认键结束发言，取消键退出竞选");
 		unsigned long current;
 		bool lightup = true;
@@ -427,7 +440,16 @@ void GameLogic::sheirffCampagin(){
 			while(timer.run()){
 
 				// button control
-				if(this->conn->input(id,btn) && (candidate & this->clientIdToBinary(id)) > 0){
+				if(this->conn->input(id,btn)){
+
+					if((btn==1 || btn == 2) && lsi.detect(id, btn)){
+						return;
+					}
+
+					if((candidate & this->clientIdToBinary(id)) == 0){
+						continue;
+					}
+
 					if(id == i && (btn == 5 || btn == 3)){
 						break;
 					}
@@ -537,7 +559,51 @@ void GameLogic::hunterSkill(){
 	this->conn->playSound(49);
 	say("请选择带走玩家");
 	Pid die = this->selectOneWithAllowId(0,this->status->hunterId,false);
+
+	if(this->status->isFirstLoop){
+		this->playerSpeech(die);
+		this->powerOffAllLight();
+	}
 	this->markPlayerDie(die);
+}
+
+void GameLogic::playerSpeech(Pid speecher){
+	uint16_t light = this->clientIdToBinary(speecher);
+	this->conn->outputLight(this->status->playerAlive, light);
+	this->conn->playSound(34 + speecher);
+	say(String(speecher) + "号");
+	this->conn->playSound(56);
+	say("发言");
+	bool lightup = true;
+	unsigned long current = millis();
+	uint8_t btn,id;
+	Timer timer(SPEECH_TIME,this->conn);
+	this->conn->clearBuffer();
+
+	LycanSusideIndicator lsi(this);
+
+
+	while(timer.run()){
+		if(this->conn->input(id,btn)){
+			if((btn==1 || btn == 2) && lsi.detect(id, btn)){
+				return;
+			}
+			if(id == speecher && (btn == 5 || btn == 3)){
+				break;
+			}
+
+		}
+		if(millis() - current >= 500){
+			current = millis();
+			if(lightup)
+				this->conn->outputLight(this->status->playerAlive, light);
+			else
+				this->conn->outputLight(this->status->playerAlive, 0);
+			lightup = !lightup;
+		}
+	}
+	this->conn->outputLight(this->status->playerAlive, 0);
+	delay(S_TIME);
 }
 
 void GameLogic::moronSkill(){
@@ -570,37 +636,11 @@ void GameLogic::startSpeech(){
 			}
 		}
 	}
-
-	unsigned long current;
-	bool lightup = true;
-
 	Pid currentSpeechPlayer = fromLeft ? this->previousAlivePlayer(startId) : this->nextAlivePlayer(startId) ;
 	startId = currentSpeechPlayer;
 
 	do{
-		uint16_t light = this->clientIdToBinary(currentSpeechPlayer);
-		this->conn->outputLight(this->status->playerAlive, light);
-		this->conn->playSound(34 + currentSpeechPlayer);
-		say(String(currentSpeechPlayer) + "号");
-		this->conn->playSound(56);
-		say("发言");
-		lightup = true;
-		Timer timer(SPEECH_TIME,this->conn);
-		this->conn->clearBuffer();
-		while(timer.run()){
-			if(this->conn->input(id,btn) && id == currentSpeechPlayer && (btn == 5 || btn == 3)){
-				break;
-			}
-			if(millis() - current >= 500){
-				current = millis();
-				if(lightup)
-					this->conn->outputLight(this->status->playerAlive, light);
-				else
-					this->conn->outputLight(this->status->playerAlive, 0);
-				lightup = !lightup;
-			}
-		}
-		this->conn->outputLight(this->status->playerAlive, 0);
+		this->playerSpeech(currentSpeechPlayer);
 		if(fromLeft){
 			currentSpeechPlayer = this->previousAlivePlayer(currentSpeechPlayer);
 
@@ -608,7 +648,7 @@ void GameLogic::startSpeech(){
 			currentSpeechPlayer = this->nextAlivePlayer(currentSpeechPlayer);
 		}
 
-	}while(startId != currentSpeechPlayer);
+	}while(startId != currentSpeechPlayer && this->tstatus->lycanSusideId == 0);
 	this->conn->playSound(65);
 	say("发言完毕");
 }
@@ -622,34 +662,9 @@ void GameLogic::voteForSuspect(){
 	say(String(this->tstatus->suspectId) + "号玩家");
 	this->conn->playSound(52);
 	say("被投票出局");
-	uint16_t light = this->clientIdToBinary(this->tstatus->suspectId);
-	this->conn->outputLight(0, light);
-	delay(S_TIME);
-	this->powerOffAllLight();
 	this->status->yesterdayDead = this->tstatus->suspectId;
-	
-	this->conn->playSound(34 + this->tstatus->suspectId);
-	say(String(this->tstatus->suspectId) + "号");
-	this->conn->playSound(56);
-	say("发言");
-	bool lightup = true;
-	unsigned long current = millis();
-	Timer timer(SPEECH_TIME,this->conn);
-	uint8_t id,btn;
-	this->conn->clearBuffer();
-	while(timer.run()){
-		if(this->conn->input(id,btn) && id == this->tstatus->suspectId && (btn == 5 || btn == 3)){
-			break;
-		}
-		if(millis() - current >= 500){
-			current = millis();
-			if(lightup)
-				this->conn->outputLight(light, light);
-			else
-				this->conn->outputLight(0, 0);
-			lightup = !lightup;
-		}
-	}
+	this->playerSpeech(this->tstatus->suspectId);
+
 	this->powerOffAllLight();
 	this->conn->playSound(65);
 	say("发言完毕");
@@ -661,7 +676,7 @@ void GameLogic::reportSuvivor(){
 	say("目前的幸存者为");
 	uint16_t l = this->status->playerAlive;
 	this->conn->outputLight(l,0);
-	delay(M_TIME);
+	delay(S_TIME);
 	this->powerOffAllLight();
 }
 
@@ -706,7 +721,16 @@ void GameLogic::onDay(){
 	this->markPlayerDie(this->tstatus->witchPosionId);
 
 	this->reportVictim(dlist);
-	this->reportSuvivor();
+
+	if(this->status->isFirstLoop){
+		for(Pid i = 1;i<PLAYER_NUMBER && this->tstatus->lycanSusideId == 0;i++){
+			if((dlist & this->clientIdToBinary(i)) == 0) continue;
+			this->playerSpeech(i);
+		}
+		this->powerOffAllLight();
+		this->conn->playSound(65);
+		say("发言完毕");
+	}
 
 	if(this->status->hunterId != this->tstatus->witchPosionId && this->tstatus->lycanKillId == this->status->hunterId){
 		this->conn->playSound(28);
@@ -717,10 +741,32 @@ void GameLogic::onDay(){
 		this->markPlayerDie(this->status->hunterId);
 	}
 
+	if(this->tstatus->lycanSusideId > 0){
+		this->markPlayerDie(this->tstatus->lycanSusideId);
+		this->checkResult();
+		delay(S_TIME);
+		this->changeSheirff();
+		delay(S_TIME);
+		this->reportSuvivor();
+		delay(S_TIME);
+		return;
+	}
+
 	this->checkResult();
 	this->changeSheirff();
-
 	this->startSpeech();
+
+	if(this->tstatus->lycanSusideId > 0){
+		this->markPlayerDie(this->tstatus->lycanSusideId);
+		this->checkResult();
+		delay(S_TIME);
+		this->changeSheirff();
+		delay(S_TIME);
+		this->reportSuvivor();
+		delay(S_TIME);
+		return;
+	}
+
 	this->voteForSuspect();
 	if(this->tstatus->suspectId == this->status->hunterId){
 		this->conn->playSound(28);
@@ -735,6 +781,7 @@ void GameLogic::onDay(){
 			this->moronSkill();
 	}
 	this->markPlayerDie(this->tstatus->suspectId);
+	this->markPlayerDie(this->tstatus->lycanSusideId);
 	this->checkResult();
 	delay(S_TIME);
 	this->changeSheirff();
@@ -802,19 +849,19 @@ bool GameLogic::confirmWithId(Pid allow, unsigned long timeout,Pid lightsOn){
 
 	uint16_t l = this->clientIdToBinary(lightsOn);
 	this->conn->outputLight(l,l);
-	
+
 	this->conn->clearBuffer();
 	Timer timer(timeout,this->conn);
 	while(timer.run()){
 		if(this->conn->input(id,btn) && this->isPlayerAlive(id) && id == allow){
 			if(btn == 3 || btn == 5){
 				this->conn->outputLight(l,0);
-				
+
 				delay(S_TIME);
 				return true;
 			}else if(btn == 4){
 				this->conn->outputLight(0,l);
-				
+
 				delay(S_TIME);
 				return false;
 			}

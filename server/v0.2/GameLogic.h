@@ -27,6 +27,7 @@
 #define SPEECH_SPEED 100
 #define SPEECH_TIME 90000
 #define CONFIRM_TIME 60000
+#define SUSIDE_TIME 500
 /**
 	Which output/intput we are using
 */
@@ -64,7 +65,7 @@ typedef struct
 	Pid witchPosionId;
 	bool witchSaved;
 	Pid suspectId;
-
+	Pid lycanSusideId;
 } TurnStatus;
 
 
@@ -83,18 +84,23 @@ class GameLogic
 		void loop();
 
 		void say(String);
-	private:
 		Driver *conn;
 		GameStatus *status;
 		TurnStatus *tstatus;
+		bool isPlayerAlive(Pid id);
+		void powerOnAllLight();
+		void powerOffAllLight();
+		uint16_t clientIdToBinary(Pid id);
+	private:
+
 
 		// game helper
 		void checkResult();
 		Pid previousAlivePlayer(Pid select);
 		Pid nextAlivePlayer(Pid select);
-		uint16_t clientIdToBinary(Pid id);
 
-		bool isPlayerAlive(Pid id);
+
+
 		void markPlayerDie(Pid id);
 		void markPlayerAlive(Pid id);
 
@@ -113,6 +119,8 @@ class GameLogic
 		void reportVictim(uint16_t deadList);
 		void voteForSuspect();
 		void startSpeech();
+		void playerSpeech(Pid speecher);
+
 		// main loop
 		void onNight();
 		void onDay();
@@ -127,8 +135,7 @@ class GameLogic
 		Pid selectOneWithAllowId(unsigned long timeout,Pid id,bool usingGreenLight);
 
 		// light control
-		void powerOnAllLight();
-		void powerOffAllLight();
+
 		void showIdentity();
 
 		// self check
