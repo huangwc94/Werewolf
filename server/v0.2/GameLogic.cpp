@@ -353,17 +353,6 @@ void GameLogic::lycanTurn(){
 		say("狼人请按任意键确认");
 		this->roleChangeMore(R_CITIZEN,R_LYCAN,LYCAN_NUMBER);
 	}
-
-	LycanSusideIndicator lsi(this);
-	uint8_t id,btn;
-	while(1){
-		if(this->conn->input(id,btn)){
-			if(lsi.detect(id, btn)){
-				LycanSusideIndicator lsi(this);
-			}
-		}
-	}
-
 	delay(S_TIME);
 	this->conn->playSound(12);
 	say("狼人请刀人");
@@ -1060,6 +1049,22 @@ Pid GameLogic::selectOneWithAllowRole(unsigned long timeout,role_t allow,bool us
 		if(this->conn->input(id,btn)){
 			if((this->status->playerRole[id - 1] == allow || allow == R_ALL) && this->isPlayerAlive(id)){
 				if(btn == 3 || btn == 5){
+
+					this->powerOffAllLight();
+					delay(XS_TIME);
+					if(usingGreenLight)
+						this->conn->outputLight(l,0);
+					else
+						this->conn->outputLight(0,l);
+
+					delay(XS_TIME);
+					this->powerOffAllLight();
+					delay(XS_TIME);
+					if(usingGreenLight)
+						this->conn->outputLight(l,0);
+					else
+						this->conn->outputLight(0,l);
+
 					delay(XS_TIME);
 					this->powerOffAllLight();
 					return select;
@@ -1108,6 +1113,22 @@ Pid GameLogic::selectOneWithAllowId(unsigned long timeout,Pid allow,bool usingGr
 		if(this->conn->input(id,btn)){
 			if(id == allow){
 				if(btn == 3 || btn == 5){
+
+					this->powerOffAllLight();
+					delay(XS_TIME);
+					if(usingGreenLight)
+						this->conn->outputLight(l,0);
+					else
+						this->conn->outputLight(0,l);
+
+					delay(XS_TIME);
+					this->powerOffAllLight();
+					delay(XS_TIME);
+					if(usingGreenLight)
+						this->conn->outputLight(l,0);
+					else
+						this->conn->outputLight(0,l);
+
 					delay(XS_TIME);
 					this->powerOffAllLight();
 					return select;
