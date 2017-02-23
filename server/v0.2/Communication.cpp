@@ -122,6 +122,7 @@ bool HardwareDriver::input(uint8_t &id, uint8_t &btn){
 					return false;
 				}
 			}else{
+				last_same = millis();
 				xid = id;
 				xbtn = btn;
 				return true;

@@ -36,23 +36,25 @@ void GameLogic::init(){
 	delay(S_TIME);
 
 	// Instruction
-	this->conn->playSound(67);
-	uint8_t id,btn;
-	uint16_t r = 0;
-	uint8_t count = PLAYER_NUMBER;
-	uint16_t skip = 0;
-	this->conn->clearBuffer();
-	unsigned long start = millis();
-	while(count > 0 && (millis() - start) < 52000){
-		if(this->conn->input(id,btn) && (skip & this->clientIdToBinary(id)) == 0){
-			skip |= this->clientIdToBinary(id);
-			r |= this->clientIdToBinary(id);
-			this->conn->outputLight(0,r);
-			count--;
-		}
-		this->conn->setScreen((start + 52000 -millis())/1000 + 1);
-	}
-	this->conn->setScreen(10000);
+	// this->conn->playSound(67);
+	// uint8_t id,btn;
+	// uint16_t r = 0;
+	// uint8_t count = PLAYER_NUMBER;
+	// uint16_t skip = 0;
+	// this->conn->clearBuffer();
+	// unsigned long start = millis();
+	// while(count > 0 && (millis() - start) < 52000){
+	// 	if(this->conn->input(id,btn) && (skip & this->clientIdToBinary(id)) == 0){
+	// 		skip |= this->clientIdToBinary(id);
+	// 		r |= this->clientIdToBinary(id);
+	// 		this->conn->outputLight(0,r);
+	// 		count--;
+	// 	}
+	// 	this->conn->setScreen((start + 52000 -millis())/1000 + 1);
+	// }
+	// this->conn->setScreen(10000);
+	//
+	//
 	this->powerOffAllLight();
 	this->conn->playSound(3);
 	say("游戏开始");
