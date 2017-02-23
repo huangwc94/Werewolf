@@ -353,6 +353,15 @@ void GameLogic::lycanTurn(){
 		say("狼人请按任意键确认");
 		this->roleChangeMore(R_CITIZEN,R_LYCAN,LYCAN_NUMBER);
 	}
+
+	LycanSusideIndicator lsi(this);
+	uint8_t id,btn;
+	while(1){
+		if(this->conn->input(id,btn)){
+			lsi.detect(id, btn);
+		}
+	}
+
 	delay(S_TIME);
 	this->conn->playSound(12);
 	say("狼人请刀人");
@@ -577,7 +586,7 @@ void GameLogic::sheirffCampagin(){
 				// button control
 				if(this->conn->input(id,btn)){
 
-					if((btn==1 || btn == 2) && lsi.detect(id, btn)){
+					if(lsi.detect(id, btn)){
 						this->status->badgeLost = true;
 						return;
 					}
@@ -721,7 +730,7 @@ void GameLogic::playerSpeech(Pid speecher){
 	LycanSusideIndicator lsi(this);
 	while(timer.run()){
 		if(this->conn->input(id,btn)){
-			if((btn==1 || btn == 2) && lsi.detect(id, btn)){
+			if(lsi.detect(id, btn)){
 				return;
 			}
 			if(id == speecher && (btn == 5 || btn == 3)){
