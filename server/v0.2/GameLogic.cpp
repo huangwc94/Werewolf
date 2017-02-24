@@ -78,6 +78,7 @@ void GameLogic::init(){
 	this->status->yesterdayDead = 0;
 	this->status->autoSeerSheirrf = false;
 	this->status->seerChecked = 0;
+	this->status->moronUsed = false;
 	this->tstatus = (TurnStatus*)malloc(sizeof(TurnStatus));
 
 
@@ -245,7 +246,7 @@ void GameLogic::checkResult_before_night(){
 
 	this->old_check_result(werewolfRemain,citizenRemain,godRemain);
 
-	if(this->isPlayerAlive(this->status->moronId))
+	if(this->isPlayerAlive(this->status->moronId) && this->status->moronUsed)
 		godRemain--;
 
 	uint8_t goodManRemain = godRemain + citizenRemain;
@@ -337,6 +338,7 @@ bool GameLogic::isPlayerAlive(Pid id){
 }
 
 void GameLogic::markPlayerDie(Pid id){
+	this->status->yesterdayDead = id;
 	this->status->playerAlive &= ~this->clientIdToBinary(id);
 }
 
@@ -408,7 +410,7 @@ void GameLogic::witchTurn(){
 		say("你要使用毒药吗");
 
 		if((!this->status->usedPosion) && (!this->tstatus->witchSaved)){
-			bool result = this->confirmWithRole(R_WITCH,CONFIRM_TIME,0);
+			bool result = this->confirmWithRole(R_WITCH,CONFIRM_TIME,this->status->witchId);
 			if(result){
 				this->tstatus->witchPosionId = this->selectOneWithAllowRole(SELECT_TIME,R_WITCH,false);
 				this->status->usedPosion = this->tstatus->witchPosionId != 0;
@@ -745,6 +747,7 @@ void GameLogic::playerSpeech(Pid speecher){
 void GameLogic::moronSkill(){
 	if(this->tstatus->suspectId == this->status->moronId){
 		this->tstatus->suspectId = 0;
+		this->status->moronUsed = true;
 	}
 }
 
@@ -799,9 +802,17 @@ void GameLogic::voteForSuspect(){
 	say(String(this->tstatus->suspectId) + "号玩家");
 	this->conn->playSound(52);
 	say("被投票出局");
-	this->status->yesterdayDead = this->tstatus->suspectId;
-	this->playerSpeech(this->tstatus->suspectId);
 
+	if(this->tstatus->suspectId == this->status->moronId){
+		this->conn->playSound(28);
+		say("你要使用技能吗");
+		if(this->confirmWithRole(R_MORON,CONFIRM_TIME,this->status->moronId))
+			this->moronSkill();
+		this->playerSpeech(this->status->moronId);
+	}
+	if(this->tstatus->suspectId!=0){
+		this->playerSpeech(this->tstatus->suspectId);
+	}
 	this->powerOffAllLight();
 	this->conn->playSound(65);
 	say("发言完毕");
@@ -813,7 +824,7 @@ void GameLogic::reportSuvivor(){
 	say("目前的幸存者为");
 	uint16_t l = this->status->playerAlive;
 	this->conn->outputLight(l,0);
-	delay(S_TIME);
+	delay(M_TIME);
 	this->powerOffAllLight();
 }
 
@@ -906,12 +917,6 @@ void GameLogic::onDay(){
 		say("你要使用技能吗");
 		if(this->confirmWithRole(R_HUNTER,CONFIRM_TIME,this->status->hunterId))
 			this->hunterSkill();
-	}
-	if(this->tstatus->suspectId == this->status->moronId){
-		this->conn->playSound(28);
-		say("你要使用技能吗");
-		if(this->confirmWithRole(R_MORON,CONFIRM_TIME,this->status->moronId))
-			this->moronSkill();
 	}
 	this->markPlayerDie(this->tstatus->suspectId);
 	this->markPlayerDie(this->tstatus->lycanSusideId);

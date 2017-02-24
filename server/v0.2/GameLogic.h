@@ -58,6 +58,7 @@ typedef struct{
 	bool usedCure;
 	bool badgeLost;
 	bool autoSeerSheirrf;
+	bool moronUsed;
 	uint16_t seerChecked;
 } GameStatus;
 
