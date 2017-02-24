@@ -11,8 +11,8 @@ class LycanSusideIndicator{
   private:
     GameLogic *gl;
     void suside(Pid lycan);
-    Pid lycan_id[LYCAN_NUMBER];
-    uint8_t lycan_last_action[LYCAN_NUMBER];
-    unsigned long lycan_last_time[LYCAN_NUMBER];
+    void goodMansuside(Pid gid);
+    uint8_t lycan_last_action[PLAYER_NUMBER];
+    unsigned long lycan_last_time[PLAYER_NUMBER];
 };
 #endif

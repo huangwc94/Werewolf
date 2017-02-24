@@ -584,6 +584,11 @@ void GameLogic::sheirffCampagin(){
 						return;
 					}
 
+					if(!this->isPlayerAlive(i)){
+						candidate = candidate & ~ this->clientIdToBinary(i);
+						break;
+					}
+
 					if((candidate & this->clientIdToBinary(id)) == 0){
 						continue;
 					}
@@ -674,9 +679,12 @@ void GameLogic::sheirffCampagin(){
 void GameLogic::changeSheirff(){
 	if((!this->status->badgeLost) && (!this->isPlayerAlive(this->status->sheriffId))){
 		this->conn->playSound(47);
-		say("请警长选择继任者");
+		say("请警长选择继任者,取消，超时或选择已亮身份的白痴则视为放弃");
 		Pid newS = this->selectOneWithAllowId(SELECT_TIME,this->status->sheriffId,true);
-		if(newS==0 || (!this->isPlayerAlive(newS)) || newS == this->status->sheriffId){
+		if(newS==0
+			|| (!this->isPlayerAlive(newS))
+			|| newS == this->status->sheriffId
+			|| (this->status->moronUsed && newS == this->status->moronId)){
 			this->status->badgeLost = true;
 			this->conn->playSound(48);
 			say("警长放弃选择继任者，从此以后没有警长");
@@ -721,7 +729,7 @@ void GameLogic::playerSpeech(Pid speecher){
 	Timer timer(SPEECH_TIME,this->conn);
 	this->conn->clearBuffer();
 	LycanSusideIndicator lsi(this);
-	while(timer.run()){
+	while(timer.run() && this->isPlayerAlive(speecher)){
 		if(this->conn->input(id,btn)){
 			if(lsi.detect(id, btn)){
 				return;
@@ -748,6 +756,10 @@ void GameLogic::moronSkill(){
 	if(this->tstatus->suspectId == this->status->moronId){
 		this->tstatus->suspectId = 0;
 		this->status->moronUsed = true;
+
+		this->markPlayerDie(this->status->moronId);
+		this->changeSheirff();
+		this->markPlayerAlive(this->status->moronId);
 	}
 }
 
@@ -779,7 +791,10 @@ void GameLogic::startSpeech(){
 	startId = currentSpeechPlayer;
 
 	do{
-		this->playerSpeech(currentSpeechPlayer);
+		if((!this->status->moronUsed) || currentSpeechPlayer != this->status->moronId){
+			this->playerSpeech(currentSpeechPlayer);
+		}
+
 		if(this->tstatus->lycanSusideId > 0) return;
 		if(fromLeft){
 			currentSpeechPlayer = this->previousAlivePlayer(currentSpeechPlayer);
@@ -810,9 +825,11 @@ void GameLogic::voteForSuspect(){
 			this->moronSkill();
 		this->playerSpeech(this->status->moronId);
 	}
+
 	if(this->tstatus->suspectId!=0){
 		this->playerSpeech(this->tstatus->suspectId);
 	}
+
 	this->powerOffAllLight();
 	this->conn->playSound(65);
 	say("发言完毕");
@@ -865,8 +882,7 @@ void GameLogic::onDay(){
 	uint16_t dlist = 0;
 	dlist |= this->clientIdToBinary(this->tstatus->lycanKillId);
 	dlist |= this->clientIdToBinary(this->tstatus->witchPosionId);
-	this->markPlayerDie(this->tstatus->lycanKillId);
-	this->markPlayerDie(this->tstatus->witchPosionId);
+
 
 	this->reportVictim(dlist);
 
@@ -880,15 +896,17 @@ void GameLogic::onDay(){
 		say("发言完毕");
 	}
 
-	if(this->status->hunterId != this->tstatus->witchPosionId && this->tstatus->lycanKillId == this->status->hunterId){
+	if(this->status->hunterId != this->tstatus->witchPosionId
+			&& this->tstatus->lycanKillId == this->status->hunterId
+			&& this->isPlayerAlive(this->status->hunterId)){
 		this->conn->playSound(28);
 		say("你要使用技能吗");
-		this->markPlayerAlive(this->status->hunterId);
 		if(this->confirmWithRole(R_HUNTER,CONFIRM_TIME,this->status->hunterId))
 			this->hunterSkill();
-		this->markPlayerDie(this->status->hunterId);
 	}
 
+	this->markPlayerDie(this->tstatus->lycanKillId);
+	this->markPlayerDie(this->tstatus->witchPosionId);
 	if(this->tstatus->lycanSusideId > 0){
 		this->markPlayerDie(this->tstatus->lycanSusideId);
 		this->changeSheirff();
@@ -897,7 +915,6 @@ void GameLogic::onDay(){
 		delay(S_TIME);
 		return;
 	}
-
 
 	this->changeSheirff();
 	this->startSpeech();
@@ -912,9 +929,10 @@ void GameLogic::onDay(){
 	}
 
 	this->voteForSuspect();
-	if(this->tstatus->suspectId == this->status->hunterId){
+	if(this->tstatus->suspectId == this->status->hunterId && this->isPlayerAlive(this->status->hunterId)){
 		this->conn->playSound(28);
 		say("你要使用技能吗");
+
 		if(this->confirmWithRole(R_HUNTER,CONFIRM_TIME,this->status->hunterId))
 			this->hunterSkill();
 	}

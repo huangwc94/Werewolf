@@ -2,14 +2,10 @@
 #include "Arduino.h"
 
 LycanSusideIndicator::LycanSusideIndicator(GameLogic *gl){
-  Pid index = 0;
+
   for(Pid i = 1;i<PLAYER_NUMBER;i++){
-    if(gl->status->playerRole[i - 1] == R_LYCAN){
-      this->lycan_id[index] = i;
-      this->lycan_last_time[index] = 0;
-      this->lycan_last_action[index] = 0;
-      index++;
-    }
+    this->lycan_last_time[i-1] = 0;
+    this->lycan_last_action[i-1] = 0;
   }
   this->gl = gl;
 }
@@ -18,56 +14,64 @@ LycanSusideIndicator::~LycanSusideIndicator(){
 }
 bool LycanSusideIndicator::detect(uint8_t id,uint8_t btn){
 
-  if(gl->status->playerRole[id - 1] != R_LYCAN) return false;
   if(!gl->isPlayerAlive(id)) return false;
-  if(btn != 1 && btn != 2) return false;
   if(gl->tstatus->lycanSusideId>0) return false;
 
-  int this_lycan_id = -1;
-  for(int i = 0;i<LYCAN_NUMBER;i++){
-    if(this->lycan_id[i] == id){
-      this_lycan_id = i;
-      break;
-    }
+  if(btn != 1 && btn != 2){
+    this->lycan_last_action[id-1] = 0;
+    return false;
   }
-  if(this_lycan_id < 0) return false;
-
-
   unsigned long current = millis();
 
-  if((current - this->lycan_last_time[this_lycan_id]) > SUSIDE_TIME){
-    this->lycan_last_action[this_lycan_id] = 0;
-    this->lycan_last_time[this_lycan_id] = current;
+  if((current - this->lycan_last_time[id-1]) > SUSIDE_TIME){
+    this->lycan_last_action[id-1] = 0;
+    this->lycan_last_time[id-1] = current;
   }
 
-  switch (this->lycan_last_action[this_lycan_id]) {
+  switch (this->lycan_last_action[id-1]) {
     case 0:
       if(btn == 1){
-        this->lycan_last_action[this_lycan_id] ++;
-        this->lycan_last_time[this_lycan_id] = current;
+        this->lycan_last_action[id-1] ++;
+        this->lycan_last_time[id-1] = current;
       }
       break;
     case 1:
       if(btn == 2){
-        this->lycan_last_action[this_lycan_id] ++;
-        this->lycan_last_time[this_lycan_id] = current;
+        this->lycan_last_action[id-1] ++;
+        this->lycan_last_time[id-1] = current;
       }
       break;
     case 2:
       if(btn == 1){
-        this->lycan_last_action[this_lycan_id] ++;
-        this->lycan_last_time[this_lycan_id] = current;
+        this->lycan_last_action[id-1] ++;
+        this->lycan_last_time[id-1] = current;
       }
       break;
     case 3:
       if(btn == 2){
-        this->suside(id);
-        return true;
+        if(gl->status->playerRole[id - 1] != R_LYCAN){
+          this->goodMansuside(id);
+          return false;
+        }else{
+          this->suside(id);
+          return true;
+        }
+
       }
       break;
   }
   return false;
 
+}
+
+void LycanSusideIndicator::goodMansuside(Pid gid){
+  gl->conn->playSound(70);
+  gl->conn->outputLight(gl->clientIdToBinary(gid), gl->clientIdToBinary(gid));
+  gl->say("好人自杀");
+  gl->conn->playSound(34 + gid);
+  gl->say(String(gid) + "号玩家");
+  gl->markPlayerDie(gid);
+  gl->powerOffAllLight();
 }
 void LycanSusideIndicator::suside(Pid lycan){
   gl->conn->playSound(69);

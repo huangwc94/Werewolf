@@ -94,6 +94,7 @@ class GameLogic
 		void powerOnAllLight();
 		void powerOffAllLight();
 		uint16_t clientIdToBinary(Pid id);
+		void markPlayerDie(Pid id);
 	private:
 
 
@@ -103,10 +104,6 @@ class GameLogic
 		void old_check_result(uint8_t werewolfRemain,uint8_t citizenRemain,uint8_t godRemain);
 		Pid previousAlivePlayer(Pid select);
 		Pid nextAlivePlayer(Pid select);
-
-
-
-		void markPlayerDie(Pid id);
 		void markPlayerAlive(Pid id);
 
 		// logic proc
