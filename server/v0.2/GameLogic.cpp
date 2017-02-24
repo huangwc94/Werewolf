@@ -560,7 +560,7 @@ void GameLogic::sheirffCampagin(){
 		bool lightup = true;
 		unsigned long random = millis();
 		random = random % 48;
-		for(uint16_t q = (int)random; q<=(PLAYER_NUMBER + random) && counter > 1; q++){
+		for(uint16_t q = (int)random; q<(PLAYER_NUMBER + random) && counter > 1; q++){
 			Pid i = (q % PLAYER_NUMBER) + 1;
 
 			if((candidate & this->clientIdToBinary(i)) == 0) continue;
@@ -892,8 +892,6 @@ void GameLogic::onDay(){
 			this->playerSpeech(i);
 		}
 		this->powerOffAllLight();
-		this->conn->playSound(65);
-		say("发言完毕");
 	}
 
 	if(this->status->hunterId != this->tstatus->witchPosionId
