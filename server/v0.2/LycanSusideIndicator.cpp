@@ -67,9 +67,9 @@ bool LycanSusideIndicator::detect(uint8_t id,uint8_t btn){
 void LycanSusideIndicator::goodMansuside(Pid gid){
   gl->conn->playSound(70);
   gl->conn->outputLight(gl->clientIdToBinary(gid), gl->clientIdToBinary(gid));
-  gl->say("好人自杀");
   gl->conn->playSound(34 + gid);
   gl->say(String(gid) + "号玩家");
+  gl->say("违反游戏规则，被判定为自杀");
   gl->markPlayerDie(gid);
   gl->powerOffAllLight();
 }
