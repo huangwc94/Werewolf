@@ -439,7 +439,7 @@ void GameLogic::seerTurn(){
 	say("预言家请睁眼");
 	if(this->status->isFirstLoop){
 		this->conn->playSound(21);
-		say("预言家请按任意键确认身份");
+		say("预言家请按任意键确认");
 		this->status->seerId = this->roleChangeOnce(R_CITIZEN,R_SEER);
 	}
 	delay(S_TIME);
