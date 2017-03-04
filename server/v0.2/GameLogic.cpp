@@ -130,6 +130,9 @@ void GameLogic::checkResult_before_day(){
 		else
 			godRemain++;
 	}
+	this->old_check_result(werewolfRemain,citizenRemain,godRemain);
+
+	return;
 
 	if(this->tstatus->lycanKillId>0){
 		if(this->status->playerRole[this->tstatus->lycanKillId] == R_LYCAN){
@@ -150,7 +153,7 @@ void GameLogic::checkResult_before_day(){
 		}
 	}
 
-	this->old_check_result(werewolfRemain,citizenRemain,godRemain);
+
 	bool werewolfWin = false;
 	if(!this->status->badgeLost && this->status->playerRole[this->status->sheriffId] == R_LYCAN){
 		if(werewolfRemain >= (citizenRemain + godRemain)){
@@ -245,7 +248,8 @@ void GameLogic::checkResult_before_night(){
   }
 
 	this->old_check_result(werewolfRemain,citizenRemain,godRemain);
-
+	return;
+	
 	if(this->isPlayerAlive(this->status->moronId) && this->status->moronUsed)
 		godRemain--;
 
